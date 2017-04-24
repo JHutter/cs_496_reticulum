@@ -1,0 +1,87 @@
+{{#if user}}
+    <div class="jumbotron">
+      <h1>Find a Match</h1>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Please provide the information below in order to find a match.</h3>
+      </div>
+      <div class="panel-body">
+        <form action="/setJob" method="post">
+           <fieldset>
+             <label for="category">Choose the category that best represents your career experience or interest:</label>
+             <select id="category" name="category" onchange="changeToInput(this);">
+                <option value="Arts, Audio/Video Technology and Communications">Arts, Audio/Video Technology and Communications</option>
+                <option value="Business Management and Administration">Business Management and Administration</option>
+                <option value="Education and Training">Education and Training</option>
+                <option value="Government and Public Administration">Government and Public Administration</option>
+                <option value="Health Science">Health Science</option>
+                <option value="Hospitality and Tourism">Hospitality and Tourism</option>
+                <option value="Human Services">Human Services</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Law, Public Safety, Corrections and Security">Law, Public Safety, Corrections and Security</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Marketing, Sales and Service">Marketing, Sales and Service</option>
+                <option value="Science, Technology, Engineering and Mathematics">Science, Technology, Engineering and Mathematics</option>
+                <option value="Transportation, Distribution and Logistics">Transportation, Distribution and Logistics</option>
+                <option value="Other">Other</option>
+              </select>
+
+            </br>
+
+             <label for="profession1">Enter your previous/desired job title:</label>
+             <input type="text" name="profession1" id="profession1" list="titlesList" placeholder="Optional">
+             <datalist id="titlesList"></datalist>
+
+           </br>
+             <input type="submit" id="professionSubmit">
+           </fieldset>
+         </form>
+      </div>
+    </div>
+    <script>
+      var Objs;
+
+      function changeToInput(obj){
+          var sel = document.getElementById('category');
+          var newProf = sel.options[sel.selectedIndex].text;
+          if(newProf == 'Other') {
+          tb=document.createElement('INPUT');
+          tb.type='text';
+          tb.name='category';
+          tb.id='category';
+          tb.value=obj.options[obj.selectedIndex].text;
+          tbb=document.createElement('INPUT');
+          tbb.type='button';
+          tbb.value='Back';
+          tbb.objs=[obj,tb,tbb];
+          tbb.onclick=function(){ Replace(this.objs); }
+          obj.parentNode.insertBefore(tb,obj);
+          obj.parentNode.insertBefore(tbb,obj);
+          obj.parentNode.removeChild(obj);
+       }
+      }
+
+      function Replace(obj){
+        obj[2].parentNode.insertBefore(obj[0],obj[2]);
+        obj[0].parentNode.removeChild(obj[1]);
+        obj[0].parentNode.removeChild(obj[2]);
+      }
+    </script>
+
+{{else}}
+  <div class="jumbotron text-center">
+    <h1>LifeBridge</h1>
+    <p>Sign in and find a student to mentor!</p><br>
+    <p> Or </p><br>
+    <p>Sign up and get started!</p>
+    <p>
+      <a href="/signin" class="btn btn-primary btn-lg" role="button">
+        <span class="glyphicon glyphicon-user"></span>
+       Sign in / Sign up
+      </a>
+    </p>
+  </div>
+
+{{/if}}

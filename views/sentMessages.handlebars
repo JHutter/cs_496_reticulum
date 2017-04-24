@@ -1,0 +1,62 @@
+{{#if user}}
+  <div class="jumbotron text-center">
+    <h1>LifeBridge</h1>
+    <p>Below are your sent messages</p>
+  </div>
+  <div class="container text-center" style="padding-bottom: 30px;">
+    <a href="/writeMessage"><button id="sendbtn" button type="button" class="btn btn-primary">Write Message</button></a>
+    <a href="/messages"><button id="messagesbtn" button type="button" class="btn btn-primary">Inbox</button></a>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Messages</h3>
+    </div>
+    <div class="panel-body">
+    <table class="table table-striped table-hover">
+      <thead>
+
+        <tr>
+
+            <th>Sent To</th>
+
+            <th>Message</th>
+
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {{#each rows}}
+
+            <tr>
+
+                <td>{{this.userName}}
+
+                <td>{{this.messagetxt}}
+
+            </tr>
+
+        {{/each}}
+
+      </tbody>
+
+      </table>
+
+    </div>
+  </div>
+
+{{else}}
+  <div class="jumbotron text-center">
+    <h1>LifeBridge</h1>
+    <p>Sign in to view your messages</p><br>
+    <p> Or </p><br>
+    <p>Sign up and get started!</p>
+    <p>
+      <a href="/signin" class="btn btn-primary btn-lg" role="button">
+        <span class="glyphicon glyphicon-user"></span>
+        Sign in / Sign up
+      </a>
+    </p>
+  </div>
+
+{{/if}}

@@ -1,0 +1,38 @@
+{{#if user}}
+    <div class="jumbotron">
+      <h1>Your Mentoring Matches</h1>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Matched Users:</h3>
+      </div>
+
+      {{#each matches}}
+      <div class="panel-body">
+        <img src="{{avatar}}" class="pull-left img-rounded" width="100" height="100">
+        <p>{{fname}} {{lname}}</p>
+        <p>{{jobCategory}}</p>
+        <p>{{jobTitle}}</p>
+        <p><a href="/sendrequest?sentid={{userID}}" class="btn btn-default btn-lg">Send Request</a></p>
+      </div>
+      {{/each}}
+
+    </div>
+
+
+{{else}}
+  <div class="jumbotron text-center">
+    <h1>LifeBridge</h1>
+    <p>Sign in to see your matches!</p><br>
+    <p> Or </p><br>
+    <p>Sign up and get started!</p>
+    <p>
+      <a href="/signin" class="btn btn-primary btn-lg" role="button">
+        <span class="glyphicon glyphicon-user"></span>
+       Sign in / Sign up
+      </a>
+    </p>
+  </div>
+
+{{/if}}

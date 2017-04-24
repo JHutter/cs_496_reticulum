@@ -1,0 +1,25 @@
+<div class="jumbotron text-center">
+<h1>LifeBridge</h1>
+<p>Edit your profile information!</p>
+</div>
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h3 class="panel-title">Profile Information</h3>
+</div>
+    <div class="panel-body">
+	  <div class="col-md-3 col-lg-3 " align="center"> <img alt="User Pic" src="https://www.justpark.com/media/img/misc/avatar-st.png" class="img-circle img-responsive"></div>
+	  <form id="newEntry" action="/edit">
+<fieldset>
+<legend>Edit Profile</legend>
+<input type="hidden" name="userID" value={{user.userID}}>
+<label for="fname">First Name </label>
+<input type="text" required name="fname" id="fname" value="{{user.fname}}">
+<label for="lname">Last Name </label>
+<input type="text" name="lname" id="lname" value="{{user.lname}}">
+<label for="password">Password</label>
+<input type="password" name="pword" id="pword" value="{{user.pword}}">
+<input type="submit" id="submit" value="submit" onclick="window.location.href='/'">
+</fieldset>
+</form>
+    </div>
