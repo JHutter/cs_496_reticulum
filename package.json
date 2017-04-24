@@ -1,0 +1,35 @@
+{
+  "name": "LifeBridge",
+  "version": "1.0.0",
+  "description": "V1 of LifeBridge app",
+  "main": "app.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec"
+  },
+  "author": "Group8",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "bcryptjs": "^0.7.12",
+    "body-parser": "^1.13.3",
+    "chai": "^3.5.0",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.3.3",
+    "express": "^4.13.4",
+    "express-handlebars": "^3.0.0",
+    "express-session": "^1.13.0",
+    "express-sessions": "^1.0.5",
+    "method-override": "^2.2.0",
+    "mocha": "^3.2.0",
+    "mysql": "^2.10.2",
+    "passport": "^0.2.1",
+    "passport-facebook": "^1.0.3",
+    "passport-google": "^0.3.0",
+    "passport-local": "^1.0.0",
+    "passport-twitter": "^1.0.2",
+    "q": "^1.0.1",
+    "request": "^2.72.0",
+    "should": "^11.1.1",
+    "supertest": "^2.0.1"
+  }
+}
