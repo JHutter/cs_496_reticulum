@@ -1,0 +1,2 @@
+So this is taken from the socket.io tutorial. It is the basic skeleton for a global chat room using sockets.
+It is possible to modify this code so that chat between two individuals is possible, which is what I plan on doing. 
