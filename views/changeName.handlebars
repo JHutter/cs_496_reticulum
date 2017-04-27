@@ -1,24 +1,80 @@
-<div class="jumbotron">
-  <h1>Change Your Name</h1>
-</div>
-
-<div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Award Information</h3>
+{{#if user}}
+    <div class="jumbotron">
+      <h1>Edit Profile</h1>
     </div>
-	
-    <div class="panel-body">
-	
-	<p>Current name:</p>
-	<p>{{user.fname}} {{user.lname}}</p>
-	<br>
-	
-	<form action=null>
-	New name: <br>
-	<input type="text" name="newName"><br>
-	<br>
-	
-	<input type="submit" name="Submit"><br>
-	</form>
-	
-</div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Current Profile</h3>
+        <br>
+        <br>
+        <p>Last Name: {{user.lname}}</p>
+        <p>First Name: {{user.fname}}</p>
+      </div>
+      <div class="panel-body">
+        <form action="/editProfile" method="post">
+           <fieldset>
+             <label for="newLName">New Last Name</label>
+             <input type="text" name="newLName" id="newLName">
+
+             </br>
+             </br>
+
+             <label for="newFName">Edit First Name?</label>
+             <select id="newFName" name="newFName" onchange="changeToInput(this);">
+                <option value={{user.fname}}>No</option>
+                <option value="Yes">Yes</option>
+              </select>
+
+           </br>
+           </br>
+             <input type="submit" id="editSubmit">
+           </fieldset>
+         </form>
+      </div>
+    </div>
+    <script>
+      var Objs;
+
+      function changeToInput(obj){
+          var sel = document.getElementById('newFName');
+          var newProf = sel.options[sel.selectedIndex].text;
+          if(newProf == 'Yes') {
+          tb=document.createElement('INPUT');
+          tb.type='text';
+          tb.name='newFName';
+          tb.id='newFName';
+          tb.value=obj.options[obj.selectedIndex].text;
+          tbb=document.createElement('INPUT');
+          tbb.type='button';
+          tbb.value='Back';
+          tbb.objs=[obj,tb,tbb];
+          tbb.onclick=function(){ Replace(this.objs); }
+          obj.parentNode.insertBefore(tb,obj);
+          obj.parentNode.insertBefore(tbb,obj);
+          obj.parentNode.removeChild(obj);
+       }
+      }
+
+      function Replace(obj){
+        obj[2].parentNode.insertBefore(obj[0],obj[2]);
+        obj[0].parentNode.removeChild(obj[1]);
+        obj[0].parentNode.removeChild(obj[2]);
+      }
+    </script>
+
+{{else}}
+  <div class="jumbotron text-center">
+    <h1>Reticulum</h1>
+    <p>Sign in</p><br>
+    <p> Or </p><br>
+    <p>Sign up and get started!</p>
+    <p>
+      <a href="/signin" class="btn btn-primary btn-lg" role="button">
+        <span class="glyphicon glyphicon-user"></span>
+       Sign in / Sign up
+      </a>
+    </p>
+  </div>
+
+{{/if}}
