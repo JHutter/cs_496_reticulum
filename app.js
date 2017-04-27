@@ -178,17 +178,17 @@ app.set('port', 50000);
 //===============ROUTES===============
 
 app.get('/', function(req, res) {
-    if(req.user)
+  if(req.user)
 	{		
-   var context = {};
-   connection.query('SELECT email FROM users where UserID = ?', [req.user.UserID], function(err, rows){
-    if(err){
-      next(err);
-      return;
-    }
-    console.log(rows);
-	 res.render('home', {user: req.user, rows: rows});
-  });
+    var context = {};
+    connection.query('SELECT email FROM users where UserID = ?', [req.user.UserID], function(err, rows){
+      if(err){
+        next(err);
+        return;
+      }
+      console.log(rows);
+      res.render('home', {user: req.user, rows: rows});
+    });
 	}
 	
 	else
@@ -251,6 +251,18 @@ app.get('/changeName', function(req, res) {
 
 app.get('/deleteAward', function(req, res) {
   res.render('deleteAward', {user: req.user});
+});
+
+app.post('/editProfile', function(req, res, next) {
+  connection.query("UPDATE users SET fname=?, lname=? WHERE UserID =?", [req.body.newFName, req.body.newLName, req.user.UserID], function(err, result){
+
+    if(err){
+      next(err);
+      return;
+    }
+  });
+
+  res.redirect('/');
 });
 
 
