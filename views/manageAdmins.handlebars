@@ -1,0 +1,36 @@
+<div class="jumbotron">
+  <h1>Add/Delete Admin Users</h1>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Admin User Management</h3>
+    </div>
+    <div class="panel-body">
+	
+		<p>Select an admin from below to delete or complete the form to create a new admin user.</p>
+		<br>
+
+		<form action="/editAdmins" method="post">
+
+		First name:<br>
+		<input type="text" name="fName" id="fName"><br><br>
+
+		Last name:<br>
+		<input type="text" name="lName" id="lName"><br><br>
+
+		Email (Username):<br>
+		<input type="text" name="email" id="email"><br><br>
+
+		Password:<br>
+		<input type="text" name="pword" id="pword"><br><br>
+
+		Time/date account was created:<br>
+		<input type="text" name="timedate"><br><br>
+
+		<input type="submit" value="Submit">
+		
+		</form>
+
+	</div>
+</div>

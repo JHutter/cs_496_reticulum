@@ -1,7 +1,7 @@
 var express = require('express');
 
 var app = express();
-var handlebars = require('express-handlebars').create({defaultLayout:'main'});
+var handlebars = require('express-handlebars').create({defaultLayout:'adminUser'});
 var session = require('express-session');
 var bcrypt = require('bcrypt-nodejs');
 var request = require('request');
@@ -253,8 +253,32 @@ app.get('/deleteAward', function(req, res) {
   res.render('deleteAward', {user: req.user});
 });
 
+app.get('/manageUsers', function(req, res) {
+  res.render('manageUsers', {user: req.user});
+});
+
+app.get('/manageAdmins', function(req, res) {
+  res.render('manageAdmins', {user: req.user});
+});
+
+app.get('/BIoperations', function(req, res) {
+  res.render('BIoperations', {user: req.user});
+});
+
 app.post('/editProfile', function(req, res, next) {
   connection.query("UPDATE users SET fname=?, lname=? WHERE UserID =?", [req.body.newFName, req.body.newLName, req.user.UserID], function(err, result){
+
+    if(err){
+      next(err);
+      return;
+    }
+  });
+
+  res.redirect('/');
+});
+
+app.post('/editAdmins', function(req, res, next) {
+  connection.query("INSERT users SET fname=?, lname=?, email=?, password=?, isAdmin=1", [req.body.fName, req.body.lName, req.body.email, req.body.pword], function(err, result){
 
     if(err){
       next(err);
