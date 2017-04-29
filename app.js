@@ -289,6 +289,53 @@ app.post('/editAdmins', function(req, res, next) {
   res.redirect('/');
 });
 
+app.post('/editUsers', function(req, res, next) {
+  connection.query("INSERT users SET fname=?, lname=?, email=?, password=?, isAdmin=0", [req.body.fName, req.body.lName, req.body.email, req.body.pword], function(err, result){
+
+    if(err){
+      next(err);
+      return;
+    }
+  });
+
+  res.redirect('/');
+});
+
+//handler for viewing/deleting regular users=================================
+
+app.get("/regUsers", function(req, res, next){
+	
+	connection.query("SELECT * FROM users WHERE isAdmin = 0", function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+	res.send(JSON.stringify(rows));
+	});
+	
+	
+});
+
+app.get("/delete-row", function(req, res, next){
+	
+	connection.query("DELETE FROM users WHERE UserID=?", [req.query.UserID], function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+	});
+	
+	connection.query("SELECT * FROM users WHERE isAdmin = 0", function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+		
+		res.send(JSON.stringify(rows));
+	});
+	
+});
+//=======================================
 
 app.use(function(req,res){
   res.status(404);

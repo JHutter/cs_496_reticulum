@@ -1,3 +1,5 @@
+<script src="/js/script.js"></script>
+
 <div class="jumbotron">
   <h1>Add/Delete Regular Users</h1>
 </div>
@@ -10,26 +12,34 @@
 	
 		<p>Select a regular user from below to delete or complete the form to create a new regular user.</p>
 		<br>
+		
+		<table id = "myTable" border = "1">
+			<tr>
+				<th>Email</th>
+				<th>Date/Time Created</th>
+				<th>Signature</th>
+				<th>Last Name</th>
+				<th>First Name</th>
+			</tr>
+		<table>
+		<br>
 
-		<form action=null>
+		<form action="/editUsers" method="post">
 
 		First name:<br>
-		<input type="text" name="firstname"><br><br>
+		<input type="text" name="fName" id="fName"><br><br>
 
 		Last name:<br>
-		<input type="text" name="lastname"><br><br>
+		<input type="text" name="lName" id="lName"><br><br>
 
 		Email (Username):<br>
-		<input type="text" name="email"><br><br>
+		<input type="text" name="email" id="email"><br><br>
 
 		Password:<br>
-		<input type="text" name="password"><br><br>
+		<input type="password" name="pword" id="pword"><br><br>
 		
 		Signature image upload:<br>
-		<input type="text" name="signature"><br><br>
-
-		Time/date account was created:<br>
-		<input type="text" name="timedate"><br><br>
+		<input type="text" name="signature" id="sig"><br><br>
 
 		<input type="submit" value="Submit">
 		
