@@ -1,41 +1,71 @@
+{{#if user}}
+
 <div class="jumbotron">
   <h1>Create a New Award</h1>
 </div>
 
 <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Name information</h3>
+      <h3 class="panel-title">Please fill out the fields below to create your new award.</h3>
     </div>
     <div class="panel-body">
-	
-		<p>Please fill out the fields below to create your new award.</p>
-		<br>
-
 		<form action=null>
+			<fieldset>
 
-		Award type:<br>
-		<input type="radio" name="awardType" value="week" checked>Employee of the Week<br>
-		<input type="radio" name="awardType" value="month" checked>Employee of the Month<br>
-		<br>
+             	<label for="empid">Select Employee ID (required):</label>
+             	<select id="empid" name="empid">
+             		{{#each employees}}
+                	<option value={{empID}}>{{empID}}</option>
+                	{{/each}}
+              	</select>
+            	</br>
+            	</br>
 
-		Recipient first name:<br>
-		<input type="text" name="firstname"><br><br>
+             	<label for="certType">Select Certificate Type (required):</label>
+             	<select id="certType" name="certType">
+             		{{#each type}}
+                	<option value={{name}}>{{name}}</option>
+                	{{/each}}
+              	</select>
+            	</br>
+            	</br>
 
-		Recipient last name:<br>
-		<input type="text" name="lastname"><br><br>
+				<label for="firstname">Recipient first name:</label>
+				<input type="text" name="firstname" id="firstname"><br><br>
 
-		Recipient email:<br>
-		<input type="text" name="email"><br><br>
+				<label for="lastname">Recipient last name:</label>
+				<input type="text" name="lastname" id="lastname"><br><br>
 
-		User issuing award:<br>
-		<input type="text" name="issuer"><br><br>
+				<label for="empemail">Recipient email:</label>
+				<input type="text" name="empemail" id="empemail"><br><br>
 
-		Time/date award was issued:<br>
-		<input type="text" name="timedate"><br><br>
+				<label for="issuer">User Issuing Award:</label>
+				<input type="text" name="issuer" id="issuer">
+				<br><br>
 
-		<input type="submit" value="Submit">
-		
+				<label for="timedate">Time/Date Award Was Issued:</label>
+				<input type="text" name="timedate" id="timedate">
+				<br><br>
+
+				<input type="submit" id="awardSubmit" value="Submit">
+
+			</fieldset>
 		</form>
-
 	</div>
 </div>
+
+{{else}}
+  <div class="jumbotron text-center">
+    <h1>Reticulum</h1>
+    <p>Sign in</p><br>
+    <p> Or </p><br>
+    <p>Sign up and get started!</p>
+    <p>
+      <a href="/signin" class="btn btn-primary btn-lg" role="button">
+        <span class="glyphicon glyphicon-user"></span>
+       Sign in / Sign up
+      </a>
+    </p>
+  </div>
+
+{{/if}}
