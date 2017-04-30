@@ -229,7 +229,7 @@ app.post('/login', passport.authenticate('local-signin', {
 //logs user out of site, deleting them from the session, and returns to homepage
 app.get('/logout', function(req, res){
   var uname = req.user.email;
-  console.log("LOGGIN OUT " + req.user.email)
+  console.log("LOGGIN OUT " + uname)
   req.logout();
   res.redirect('/');
   req.session.notice = "You have successfully been logged out " + uname + "!";
@@ -242,7 +242,23 @@ app.get('/examplePage', function(req, res) {
 });
 
 app.get('/createNewAward', function(req, res) {
-  res.render('createNewAward', {user: req.user});
+  // search for all employees
+  var empQuery = "SELECT * FROM employees";
+  connection.query(empQuery, function(err,rows){
+    if(err){
+      next(err);
+      return;
+    }
+    employees = rows;
+    var typeQuery = "SELECT * FROM certtypes";
+    connection.query(typeQuery, function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+      res.render('createNewAward', {user: req.user, employees: employees, type: rows});
+    });
+  });
 });
 
 app.get('/changeName', function(req, res) {
