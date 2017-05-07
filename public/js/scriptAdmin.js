@@ -6,8 +6,7 @@ function loadTable(){
 
 var req = new XMLHttpRequest();
 
-req.open("get", "http://localhost:50000/regUsers", true);
-
+req.open("get", "http://localhost:50000/adminUsers", true);
 
 req.addEventListener('load', function(){
 		if(req.status >= 200 && req.status < 400){
@@ -24,10 +23,6 @@ req.addEventListener('load', function(){
 	req.send(null);
 
 }
-
-
-
-
 
 function bindDelete(theButtons){
 	
@@ -46,7 +41,7 @@ function bindDelete(theButtons){
 function deleteRow(theRow){
 	
 	var req = new XMLHttpRequest();
-	req.open("GET", "http://localhost:50000/delete-row?UserID=" + theRow, true);
+	req.open("GET", "http://localhost:50000/delete-admin-row?UserID=" + theRow, true);
 	
 	req.addEventListener('load', function(){
 	if(req.status >= 200 && req.status < 400)
@@ -78,7 +73,7 @@ if(document.getElementById("myTable"))
 	
 	
 		for(r in info[p]){
-			if(r == "userID" || r == "password" || r == "isAdmin" || r == "UserID" || r == "timeCreated"){}
+			if(r == "userID" || r == "password" || r == "isAdmin" || r == "UserID" || r == "adminID"){}
 			else{
 			var newCell = document.createElement("TD");
 			newCell.textContent = info[p][r];

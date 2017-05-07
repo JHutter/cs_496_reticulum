@@ -1,3 +1,5 @@
+<script src = "/js/scriptAdmin.js"></script>
+
 <div class="jumbotron">
   <h1>Add/Delete Admin Users</h1>
 </div>
@@ -9,6 +11,16 @@
     <div class="panel-body">
 	
 		<p>Select an admin from below to delete or complete the form to create a new admin user.</p>
+		<br>
+		
+		<table id = "myTable" border = "1">
+			<tr>
+				<th>First Name</th>			
+				<th>Last Name</th>
+				<th>Email</th>
+				<th>Date/Time Created</th>
+			</tr>
+		<table>
 		<br>
 
 		<form action="/editAdmins" method="post">

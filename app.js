@@ -90,7 +90,7 @@ passport.use('local-signup', new LocalStrategy({
 
     // find a user whose email is the same as the forms email
     // we are checking to see if the user trying to login already exists
-    connection.query("select * from users where email = ?", [email],function(err,rows){
+    connection.query("select * from login where email = ?", [email],function(err,rows){
       console.log(rows);
       console.log("above row object");
       if (err)
@@ -108,15 +108,19 @@ passport.use('local-signup', new LocalStrategy({
           newUserMysql.fname = req.body.fname;
           newUserMysql.lname = req.body.lname;
 
-          var insertQuery = "INSERT INTO users ( email, password, fname, lname ) values (?, ?, ?, ?)";
+          var insertQuery = "INSERT INTO login ( email, password) values (?, ?)";
+		  //var insertUsersQuery = "INSERT INTO users ( userID, fname, lname ) values (?, ?, ?)";
           console.log(insertQuery);
 
           // ALSO INSERT TIME CREATED
-          connection.query(insertQuery, [email, password, req.body.fname, req.body.lname], function(err,rows){
+          connection.query(insertQuery, [email, password], function(err,rows){
             newUserMysql.id = rows.insertId;
+			//connection.query(insertUsersQuery, [rows.insertID, req.body.fname, req.body.lname], function(err,rows){return done(null, newUserMysql);});
 
             return done(null, newUserMysql);
           });
+		  
+		  
             }
     });
 })
@@ -130,7 +134,7 @@ passport.use('local-signin', new LocalStrategy({
             passReqToCallback : true // allows us to pass back the entire request to the callback
         },
         function(req, email, password, done) { // callback with email and password from our form
-            connection.query("select * from users where email = ?", [email],function(err,rows){
+            connection.query("select * from login where email = ?", [email],function(err,rows){
                 console.log(rows);
                 if (err) {
                     console.log('error');
@@ -181,7 +185,7 @@ app.get('/', function(req, res) {
   if(req.user)
 	{		
     var context = {};
-    connection.query('SELECT email FROM users where UserID = ?', [req.user.UserID], function(err, rows){
+    connection.query('SELECT email FROM login where UserID = ?', [req.user.UserID], function(err, rows){
       if(err){
         next(err);
         return;
@@ -203,6 +207,8 @@ app.get('/signin', function(req, res){
 });
 //sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
 app.post('/local-reg', passport.authenticate('local-signup', {
+	
+
   successRedirect: '/',
   failureRedirect: '/signin'
   })
@@ -243,7 +249,7 @@ app.get('/examplePage', function(req, res) {
 
 app.get('/createNewAward', function(req, res) {
   // search for all employees
-  var empQuery = "SELECT * FROM employees";
+  var empQuery = "SELECT * FROM users";
   connection.query(empQuery, function(err,rows){
     if(err){
       next(err);
@@ -256,7 +262,7 @@ app.get('/createNewAward', function(req, res) {
         next(err);
         return;
       }
-      res.render('createNewAward', {user: req.user, employees: employees, type: rows});
+      res.render('createNewAward', {user: req.user, users: users, type: rows});
     });
   });
 });
@@ -294,7 +300,15 @@ app.post('/editProfile', function(req, res, next) {
 });
 
 app.post('/editAdmins', function(req, res, next) {
-  connection.query("INSERT users SET fname=?, lname=?, email=?, password=?, isAdmin=1", [req.body.fName, req.body.lName, req.body.email, req.body.pword], function(err, result){
+  connection.query("INSERT admins SET fname=?, lname=?", [req.body.fName, req.body.lName], function(err, result){
+
+    if(err){
+      next(err);
+      return;
+    }
+  });
+  
+  connection.query("INSERT login SET email=?, password=?", [req.body.email, req.body.pword], function(err, result){
 
     if(err){
       next(err);
@@ -306,7 +320,24 @@ app.post('/editAdmins', function(req, res, next) {
 });
 
 app.post('/editUsers', function(req, res, next) {
-  connection.query("INSERT users SET fname=?, lname=?, email=?, password=?, isAdmin=0", [req.body.fName, req.body.lName, req.body.email, req.body.pword], function(err, result){
+  
+  connection.query("INSERT login SET email=?, password=?", [req.body.email, req.body.pword], function(err, result){
+	
+    if(err){
+      next(err);
+      return;
+    }
+  });
+  
+  var fname = encodeURIComponent(req.body.fName);
+  var lname = encodeURIComponent(req.body.lName);
+
+  res.redirect('/editUsers2?fname=' + fname + '&lname=' + lname);
+});
+
+app.post('/editUsers2', function(req, res, next) {
+  
+  connection.query("INSERT users SET fname=?, lname=?", [req.query.fname, req.query.lname], function(err, result){
 
     if(err){
       next(err);
@@ -321,16 +352,19 @@ app.post('/editUsers', function(req, res, next) {
 
 app.get("/regUsers", function(req, res, next){
 	
-	connection.query("SELECT * FROM users WHERE isAdmin = 0", function(err, rows, fields){
+	connection.query("SELECT * FROM users INNER JOIN login on users.userID = login.UserID WHERE login.isAdmin = 0", function(err, rows, fields){
 		if(err){
 			next(err);
 			return;
 		}
+		
+		
 	res.send(JSON.stringify(rows));
 	});
 	
 	
 });
+
 
 app.get("/delete-row", function(req, res, next){
 	
@@ -351,7 +385,51 @@ app.get("/delete-row", function(req, res, next){
 	});
 	
 });
-//=======================================
+//handler for viewing/deleting admin users=======================================
+
+app.get("/adminUsers", function(req, res, next){
+	
+	connection.query("SELECT * FROM admins INNER JOIN login on admins.adminID = login.UserID WHERE login.isAdmin = 1", function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+		
+		
+	res.send(JSON.stringify(rows));
+	});
+	
+	
+});
+
+app.get("/delete-admin-row", function(req, res, next){
+	
+	connection.query("DELETE FROM admins WHERE fname=? AND lname=?", [req.query.fname, req.query.lname], function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+	});
+	
+	connection.query("DELETE FROM login WHERE UserID=?", [req.query.UserID], function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+	});	
+	
+	connection.query("SELECT * FROM users WHERE isAdmin = 1", function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+		
+		res.send(JSON.stringify(rows));
+	});
+	
+});
+
+//====================================================================
 
 app.use(function(req,res){
   res.status(404);
