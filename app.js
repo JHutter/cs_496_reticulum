@@ -1,7 +1,7 @@
 var express = require('express');
 
 var app = express();
-var handlebars = require('express-handlebars').create({defaultLayout:'adminUser'});
+var handlebars = require('express-handlebars').create({defaultLayout:'main'});
 var session = require('express-session');
 var bcrypt = require('bcrypt-nodejs');
 var request = require('request');
@@ -213,6 +213,17 @@ app.post('/local-reg', passport.authenticate('local-signup', {
   failureRedirect: '/signin'
   })
 );
+
+//displays reset password page
+app.get('/resetPass', function(req, res){
+  res.render('resetPass');
+});
+
+//displays reset password page
+app.post('/newPass', function(req, res){
+  // do something with req.body.acctEmail
+  res.redirect('/');
+});
 
 //sends the request through our local login/signin strategy, and if successful takes user to homepage, otherwise returns then to signin page
 app.post('/login', passport.authenticate('local-signin', {
