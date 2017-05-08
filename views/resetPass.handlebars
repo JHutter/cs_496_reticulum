@@ -1,32 +1,16 @@
-{{#if user}}
-  <div class="jumbotron text-center">
-    <h1>Welcome to Reticulum Employee Recognition</h1>
-    <p>Below is your profile information!</p>
-  </div>
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Profile Information</h3>
-    </div>
-    <div class="panel-body">
-	  <div class="col-md-3 col-lg-3 " align="center"> <img alt="User Pic" src="https://www.justpark.com/media/img/misc/avatar-st.png" class="img-circle img-responsive"> </div>
-    </label>
-	  <p>Name: {{user.fname}} {{user.lname}}</p>
-      <p>Username: {{user.email}}</p>
-    </div>
-  </div>
+<h1>Reset Password Here</h1>
 
-{{else}}
-  <div class="jumbotron text-center">
-    <h1>Reticulum</h1>
-    <p>Sign in and view your profile!</p><br>
-    <p> Or </p><br>
-    <p>Sign up and get started!</p>
-    <p>
-      <a href="/signin" class="btn btn-primary btn-lg" role="button">
-        <span class="glyphicon glyphicon-user"></span>
-        Sign in / Sign up
-      </a>
-    </p>
-  </div>
-
-{{/if}}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">New Password Set Via Email</h3>
+      </div>
+      <div class="panel-body">
+        <form action="/newPass" method="post">
+           <fieldset>
+             <label for="newLName">Enter Email Used To Register Account</label>
+             <input type="text" name="acctEmail" id="acctEmail">
+             <input type="submit" id="resetSubmit">
+           </fieldset>
+         </form>
+      </div>
+    </div>
