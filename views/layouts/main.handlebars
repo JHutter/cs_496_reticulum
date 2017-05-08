@@ -28,28 +28,53 @@
           <ul class="nav navbar-nav">
             <li>
               {{#if user}}
-                <p class="navbar-text">
+                {{#if user.isAdmin}}
+                  <p class="navbar-text">
                   <strong>Hi,</strong>
                   {{user.fname}}
-                </p>
-                </li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
+                  </p>
+                  </li>
+                  </ul>
+                  <ul class="nav navbar-nav navbar-right">
                   <li>
                     <a href="/">Home</a>
                   </li>
                   <li>
-                    <a href="/createNewAward">Create New Award Entry</a>
+                    <a href="/manageUsers">Add/Delete Regular Users</a>
                   </li>
                    <li>
-                    <a href="/changeName">Change Name</a>
+                    <a href="/manageAdmins">Add/Delete Admin Users</a>
                   </li>
                   <li>
-                    <a href="/deleteAward">Delete Award</a>
+                    <a href="/BIoperations">Perform BI Operations</a>
                   </li>
                   <li>
                     <a href="/logout">Log Out</a>
                   </li>
+                {{else}}
+                    <p class="navbar-text">
+                    <strong>Hi,</strong>
+                    {{user.fname}}
+                    </p>
+                    </li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                    <li>
+                      <a href="/">Home</a>
+                    </li>
+                    <li>
+                      <a href="/createNewAward">Create New Award Entry</a>
+                    </li>
+                    <li>
+                      <a href="/changeName">Change Name</a>
+                    </li>
+                    <li>
+                      <a href="/deleteAward">Delete Award</a>
+                    </li>
+                    <li>
+                      <a href="/logout">Log Out</a>
+                    </li>
+                {{/if}}
               {{else}}
                 <a href="/signin">Sign In/Sign Up</a>
                 </li>
