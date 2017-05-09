@@ -8,8 +8,8 @@
         <h3 class="panel-title">Current Profile</h3>
         <br>
         <br>
-        <p>Last Name: {{user.lname}}</p>
-        <p>First Name: {{user.fname}}</p>
+        <p>Last Name: {{name.lname}}</p>
+        <p>First Name: {{name.fname}}</p>
       </div>
       <div class="panel-body">
         <form action="/editProfile" method="post">
@@ -22,7 +22,7 @@
 
              <label for="newFName">Edit First Name?</label>
              <select id="newFName" name="newFName" onchange="changeToInput(this);">
-                <option value={{user.fname}}>No</option>
+                <option value={{name.fname}}>No</option>
                 <option value="Yes">Yes</option>
               </select>
 
