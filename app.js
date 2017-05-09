@@ -246,7 +246,7 @@ app.post('/login', passport.authenticate('local-signin', {
 //logs user out of site, deleting them from the session, and returns to homepage
 app.get('/logout', function(req, res){
   var uname = req.user.email;
-  console.log("LOGGIN OUT " + uname)
+  console.log("LOGGIN OUT " + uname);
   req.logout();
   res.redirect('/');
   req.session.notice = "You have successfully been logged out " + uname + "!";
@@ -278,8 +278,16 @@ app.get('/createNewAward', function(req, res) {
   });
 });
 
-app.get('/changeName', function(req, res) {
-  res.render('changeName', {user: req.user});
+app.get('/changeName', function(req, res, next) {
+  var ID = req.user.UserID;
+  connection.query('SELECT fname, lname FROM users WHERE userID = ?', [ID], function(err, rows){
+    if(err){
+      next(err);
+      return;
+    }
+    name = rows[0];
+    res.render('changeName', {user: req.user, name: name});
+  });
 });
 
 app.get('/deleteAward', function(req, res) {
@@ -299,7 +307,7 @@ app.get('/BIoperations', function(req, res) {
 });
 
 app.post('/editProfile', function(req, res, next) {
-  connection.query("UPDATE users SET fname=?, lname=? WHERE UserID =?", [req.body.newFName, req.body.newLName, req.user.UserID], function(err, result){
+  connection.query("UPDATE users SET fname=?, lname=? WHERE userID =?", [req.body.newFName, req.body.newLName, req.user.UserID], function(err, result){
 
     if(err){
       next(err);
