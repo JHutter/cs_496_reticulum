@@ -346,23 +346,21 @@ app.post('/editAdmins', function(req, res, next) {
 
 app.post('/editUsers', function(req, res, next) {
   
-  connection.query("INSERT login SET email=?, password=?", [req.body.email, req.body.pword], function(err, result){
-	
+  var loginQuery = "INSERT IGNORE INTO login (`email`, `password`, `isAdmin`) VALUES (?, ?, ?)";
+  connection.query(loginQuery, [req.body.email, req.body.pword, 0], function(err,rows){
     if(err){
       next(err);
       return;
     }
+    var newID = rows.insertId
+    var userQuery = "INSERT IGNORE INTO users (`userID`, `regionID`, `fname`, `lname`) VALUES (?, ?, ?, ?)";
+    connection.query(userQuery, [newID, 1, req.body.fName, req.body.lName], function(err,rows){
+      if(err){
+          next(err);
+        return;
+      }
+    });
   });
-  
-  connection.query("INSERT users SET fname=?, lname=?", [req.body.fname, req.body.lname], function(err, result){
-
-    if(err){
-      next(err);
-      return;
-    }
-  });
-  
-
   res.redirect('/');
 });
 
