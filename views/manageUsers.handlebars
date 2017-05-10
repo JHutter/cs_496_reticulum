@@ -1,3 +1,5 @@
+{{#if user}}
+
 <script src="/js/script.js"></script>
 
 <div class="jumbotron">
@@ -26,12 +28,20 @@
 		<br>
 
 		<form action="/editUsers" method="post">
+		<fieldset>
 
 		First name:<br>
 		<input type="text" name="fName" id="fName"><br><br>
 
 		Last name:<br>
 		<input type="text" name="lName" id="lName"><br><br>
+
+        <label for="rid">Select Region (required):</label> <br>
+        <select id="rid" name="rid">
+        {{#each regions}}
+             <option value={{regionID}}>{{regionID}} - {{regionName}}</option>
+        {{/each}}
+        </select> <br><br>
 
 		Email (Username):<br>
 		<input type="text" name="email" id="email"><br><br>
@@ -43,8 +53,24 @@
 		<input type="text" name="signature" id="sig"><br><br>
 
 		<input type="submit" value="Submit">
-		
+		</fieldset>
 		</form>
 
 	</div>
 </div>
+
+{{else}}
+  <div class="jumbotron text-center">
+    <h1>Reticulum</h1>
+    <p>Sign in</p><br>
+    <p> Or </p><br>
+    <p>Sign up and get started!</p>
+    <p>
+      <a href="/signin" class="btn btn-primary btn-lg" role="button">
+        <span class="glyphicon glyphicon-user"></span>
+       Sign in / Sign up
+      </a>
+    </p>
+  </div>
+
+{{/if}}
