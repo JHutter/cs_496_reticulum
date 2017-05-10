@@ -266,7 +266,7 @@ app.get('/createNewAward', function(req, res) {
       next(err);
       return;
     }
-    employees = rows;
+    users = rows;
     var typeQuery = "SELECT * FROM certtypes";
     connection.query(typeQuery, function(err,rows){
       if(err){
@@ -313,6 +313,12 @@ app.post('/editProfile', function(req, res, next) {
       next(err);
       return;
     }
+    connection.query("UPDATE login SET isAdmin=? WHERE userID =?", [req.user.isAdmin, req.user.UserID], function(err, result){
+      if(err){
+      next(err);
+      return;
+    }
+    });
   });
 
   res.redirect('/');
