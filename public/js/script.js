@@ -78,7 +78,7 @@ if(document.getElementById("myTable"))
 	
 	
 		for(r in info[p]){
-			if(r == "userID" || r == "password" || r == "isAdmin" || r == "UserID" || r == "timeCreated"){}
+			if(r == "userID" || r == "password" || r == "isAdmin" || r == "UserID"){}
 			else{
 			var newCell = document.createElement("TD");
 			newCell.textContent = info[p][r];

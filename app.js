@@ -354,24 +354,18 @@ app.post('/editUsers', function(req, res, next) {
     }
   });
   
-  var fname = encodeURIComponent(req.body.fName);
-  var lname = encodeURIComponent(req.body.lName);
-
-  res.redirect('/editUsers2?fname=' + fname + '&lname=' + lname);
-});
-
-app.post('/editUsers2', function(req, res, next) {
-  
-  connection.query("INSERT users SET fname=?, lname=?", [req.query.fname, req.query.lname], function(err, result){
+  connection.query("INSERT users SET fname=?, lname=?", [req.body.fname, req.body.lname], function(err, result){
 
     if(err){
       next(err);
       return;
     }
   });
+  
 
   res.redirect('/');
 });
+
 
 //handler for viewing/deleting regular users=================================
 
@@ -393,20 +387,28 @@ app.get("/regUsers", function(req, res, next){
 
 app.get("/delete-row", function(req, res, next){
 	
-	connection.query("DELETE FROM users WHERE UserID=?", [req.query.UserID], function(err, rows, fields){
+	connection.query("DELETE FROM users WHERE userID=?", [req.query.UserID], function(err, rows, fields){
 		if(err){
 			next(err);
 			return;
 		}
 	});
 	
-	connection.query("SELECT * FROM users WHERE isAdmin = 0", function(err, rows, fields){
+	connection.query("DELETE FROM login WHERE UserID=?", [req.query.UserID], function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+	});
+	
+	connection.query("SELECT * FROM users INNER JOIN login on users.userID = login.UserID WHERE login.isAdmin = 0", function(err, rows, fields){
 		if(err){
 			next(err);
 			return;
 		}
 		
-		res.send(JSON.stringify(rows));
+		
+	res.send(JSON.stringify(rows));
 	});
 	
 });
@@ -429,7 +431,7 @@ app.get("/adminUsers", function(req, res, next){
 
 app.get("/delete-admin-row", function(req, res, next){
 	
-	connection.query("DELETE FROM admins WHERE fname=? AND lname=?", [req.query.fname, req.query.lname], function(err, rows, fields){
+	connection.query("DELETE FROM admins WHERE adminID = ?", [req.query.UserID], function(err, rows, fields){
 		if(err){
 			next(err);
 			return;
@@ -443,13 +445,14 @@ app.get("/delete-admin-row", function(req, res, next){
 		}
 	});	
 	
-	connection.query("SELECT * FROM users WHERE isAdmin = 1", function(err, rows, fields){
+	connection.query("SELECT * FROM admins INNER JOIN login on admins.adminID = login.UserID WHERE login.isAdmin = 1", function(err, rows, fields){
 		if(err){
 			next(err);
 			return;
 		}
 		
-		res.send(JSON.stringify(rows));
+		
+	res.send(JSON.stringify(rows));
 	});
 	
 });
