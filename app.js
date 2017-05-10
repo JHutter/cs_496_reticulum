@@ -260,8 +260,8 @@ app.get('/examplePage', function(req, res) {
 
 app.get('/createNewAward', function(req, res) {
   // search for all employees
-  var empQuery = "SELECT * FROM users";
-  connection.query(empQuery, function(err,rows){
+  var uQuery = "SELECT * FROM users";
+  connection.query(uQuery, function(err,rows){
     if(err){
       next(err);
       return;
@@ -295,7 +295,14 @@ app.get('/deleteAward', function(req, res) {
 });
 
 app.get('/manageUsers', function(req, res) {
-  res.render('manageUsers', {user: req.user});
+    var regionQuery = "SELECT * FROM regions";
+    connection.query(regionQuery, function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+      res.render('manageUsers', {user: req.user, regions: rows});
+    });
 });
 
 app.get('/manageAdmins', function(req, res) {
@@ -325,20 +332,20 @@ app.post('/editProfile', function(req, res, next) {
 });
 
 app.post('/editAdmins', function(req, res, next) {
-  connection.query("INSERT admins SET fname=?, lname=?", [req.body.fName, req.body.lName], function(err, result){
-
+  var loginQuery = "INSERT IGNORE INTO login (`email`, `password`, `isAdmin`) VALUES (?, ?, ?)";
+  connection.query(loginQuery, [req.body.email, req.body.pword, 1], function(err,rows){
     if(err){
       next(err);
       return;
     }
-  });
-  
-  connection.query("INSERT login SET email=?, password=?", [req.body.email, req.body.pword], function(err, result){
-
-    if(err){
-      next(err);
-      return;
-    }
+    var newID = rows.insertId
+    var adminQuery = "INSERT IGNORE INTO admins (`adminID`, `fname`, `lname`) VALUES (?, ?, ?)";
+    connection.query(adminQuery, [newID, req.body.fName, req.body.lName], function(err,rows){
+      if(err){
+          next(err);
+        return;
+      }
+    });
   });
 
   res.redirect('/');
@@ -354,7 +361,7 @@ app.post('/editUsers', function(req, res, next) {
     }
     var newID = rows.insertId
     var userQuery = "INSERT IGNORE INTO users (`userID`, `regionID`, `fname`, `lname`) VALUES (?, ?, ?, ?)";
-    connection.query(userQuery, [newID, 1, req.body.fName, req.body.lName], function(err,rows){
+    connection.query(userQuery, [newID, req.body.rid, req.body.fName, req.body.lName], function(err,rows){
       if(err){
           next(err);
         return;
