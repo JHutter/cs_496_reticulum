@@ -80,13 +80,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use('local-signup', new LocalStrategy({
-        // by default, local strategy uses username and password, we will override with email
-        usernameField : 'email',
-        passwordField : 'password',
-        passReqToCallback : true // allows us to pass back the entire request to the callback
-    },
+    // by default, local strategy uses username and password, we will override with email
+    usernameField : 'email',
+    passwordField : 'password',
+    passReqToCallback : true // allows us to pass back the entire request to the callback
+  },
 
-    function(req, email, password, done) {
+  function(req, email, password, done) {
 
     // find a user whose email is the same as the forms email
     // we are checking to see if the user trying to login already exists
@@ -95,35 +95,39 @@ passport.use('local-signup', new LocalStrategy({
       console.log("above row object");
       if (err)
         return done(err);
-       if (rows.length) {
-                req.session.error = 'That username is already in use, please try a different one.'; //inform user could not log them in
-                return done(null, false, req.session.error, req.flash('signupMessage', 'That e-mail is already taken.'));
-        } else {
+      if (rows.length) {
+        req.session.error = 'That username is already in use, please try a different one.'; //inform user could not log them in
+        return done(null, false, req.session.error, req.flash('signupMessage', 'That e-mail is already taken.'));
+      } else {
         // if there is no user with that email
-                // create the user
-          var newUserMysql = new Object();
+        // create the user
+        var newUserMysql = new Object();
 
-          newUserMysql.email = email;
-          newUserMysql.password = password; // use the generateHash function
-          newUserMysql.fname = req.body.fname;
-          newUserMysql.lname = req.body.lname;
+        newUserMysql.email = email;
+        newUserMysql.password = password; // use the generateHash function
+        newUserMysql.fname = req.body.fname;
+        newUserMysql.lname = req.body.lname;
+        newUserMysql.isAdmin = 0;
 
-          var insertQuery = "INSERT INTO login ( email, password) values (?, ?)";
-		  //var insertUsersQuery = "INSERT INTO users ( userID, fname, lname ) values (?, ?, ?)";
-          console.log(insertQuery);
+        var insertQuery = "INSERT INTO login ( email, password, isAdmin) values (?, ?, ?)";
+		    var insertUsersQuery = "INSERT INTO users ( userID, regionID, fname, lname ) values (?, ?, ?, ?)";
+        //console.log(insertQuery);
 
-          // ALSO INSERT TIME CREATED
-          connection.query(insertQuery, [email, password], function(err,rows){
-            newUserMysql.id = rows.insertId;
-			//connection.query(insertUsersQuery, [rows.insertID, req.body.fname, req.body.lname], function(err,rows){return done(null, newUserMysql);});
-
-            return done(null, newUserMysql);
+        // ALSO INSERT TIME CREATED
+        connection.query(insertQuery, [email, password, 0], function(err,rows){
+          if (err)
+            return done(err);
+          newUserMysql.id = rows.insertId;
+          connection.query(insertUsersQuery, [newUserMysql.id, req.body.rid, req.body.fname, req.body.lname], function(err,rows){
+            if (err)
+              return done(err);
           });
-		  
-		  
-            }
+
+          return done(null, newUserMysql);
+        });
+      }
     });
-})
+  })
 );
 
 //user login strategy
@@ -202,8 +206,15 @@ app.get('/', function(req, res) {
 });
 
 //displays our signup page
-app.get('/signin', function(req, res){
-  res.render('signin', { msg: req.flash('signupMessage'), msg: req.flash('loginMessage')});
+app.get('/signin', function(req, res, next){
+  var regionQuery = "SELECT * FROM regions";
+  connection.query(regionQuery, function(err,rows){
+    if(err){
+      next(err);
+      return;
+    }
+    res.render('signin', { regions: rows, msg: req.flash('signupMessage'), msg: req.flash('loginMessage')});
+  });
 });
 //sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
 app.post('/local-reg', passport.authenticate('local-signup', {
@@ -252,11 +263,6 @@ app.get('/logout', function(req, res){
   req.session.notice = "You have successfully been logged out " + uname + "!";
 });
 
-
-//EXAMPLE ROUTE: REPLACE THIS
-app.get('/examplePage', function(req, res) {
-  res.render('examplePage', {user: req.user});
-});
 
 app.get('/createNewAward', function(req, res) {
   // search for all employees
