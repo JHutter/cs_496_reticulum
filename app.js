@@ -335,7 +335,14 @@ app.get('/manageAdmins', function(req, res) {
 });
 
 app.get('/BIoperations', function(req, res) {
-  res.render('BIoperations', {user: req.user});
+  queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
+  res.render('BIoperations', {user: req.user, sampleQ: queries});
+
+});
+
+app.get('/BIquery', function(req, res) {	
+  res.render('BIquery', {user: req.user});
+
 });
 
 app.post('/editProfile', function(req, res, next) {
