@@ -1,3 +1,4 @@
+{{#if user}}
 <div class="jumbotron">
   <h1>Delete an Award</h1>
 </div>
@@ -7,18 +8,30 @@
       <h3 class="panel-title">Issued Awards</h3>
     </div>
 	
-	<div class="panel-body">
-		<p>Please select an award from below to delete:</p>
-		
-		<table border="1" cellpadding="5" cellspacing="5">
-		<tr>
-		<th>Award Type</th>
-		<th>Recipient</th>
-		<th>Issue time/date</th>
-		<th>Delete?</th>
-		</tr>
-		</table>
-	</div>
-	
+      {{#each awards}}
+      <div class="panel-body">
+        <p>Award No. {{empCertID}}</p>
+        <p>User No. {{userID}}</p>
+        <p>Award Type No. {{certID}}</p>
+        <p>Issue Date: {{dateAwarded}}</p>
+        <p><a href="/deleteAward?sentid={{empCertID}}" class="btn btn-default btn-lg">Delete</a></p>
+      </div>
+      {{/each}}
 	
 </div>
+
+{{else}}
+  <div class="jumbotron text-center">
+    <h1>Reticulum</h1>
+    <p>Sign in</p><br>
+    <p> Or </p><br>
+    <p>Sign up and get started!</p>
+    <p>
+      <a href="/signin" class="btn btn-primary btn-lg" role="button">
+        <span class="glyphicon glyphicon-user"></span>
+       Sign in / Sign up
+      </a>
+    </p>
+  </div>
+
+{{/if}}
