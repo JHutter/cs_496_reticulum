@@ -7,9 +7,20 @@
       <h3 class="panel-title">Query Your Data</h3>
     </div>
     <div class="panel-body">
-	
-		<p>How would you like to query your data?</p>
-		<br>
-
+		<p>How would you like to query your data?</p>		
+		
+		<form action='/BIquery'>
+			<fieldset>
+				<br>
+				<label for="query">Select Sample Query:</label>
+						<select id="SampleQuery" name="SampleQuery" >
+							{{#each sampleQ}}
+							<option value={{query}}>{{textQ}}</option>
+							{{/each}}
+						</select>
+						</br>
+				<input type="submit" id="BIquery" value="Submit">
+			</fieldset>
+		</form>
 	</div>
 </div>
