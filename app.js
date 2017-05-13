@@ -284,6 +284,18 @@ app.get('/createNewAward', function(req, res) {
   });
 });
 
+app.post('/newAward', function(req, res, next) {
+  
+  var awardQuery = "INSERT IGNORE INTO empcerts (`userID`, `certID`, `dateAwarded`) VALUES (?, ?, ?)";
+  connection.query(awardQuery, [req.body.uid, req.body.certType, req.body.timedate], function(err,rows){
+    if(err){
+      next(err);
+      return;
+    }
+  });
+  res.redirect('/');
+});
+
 app.get('/changeName', function(req, res, next) {
   var ID = req.user.UserID;
   connection.query('SELECT fname, lname FROM users WHERE userID = ?', [ID], function(err, rows){
@@ -297,7 +309,14 @@ app.get('/changeName', function(req, res, next) {
 });
 
 app.get('/deleteAward', function(req, res) {
-  res.render('deleteAward', {user: req.user});
+    var awardQuery = "SELECT * FROM empcerts";
+    connection.query(awardQuery, function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+      res.render('deleteAward', {user: req.user, awards: rows});
+    });
 });
 
 app.get('/manageUsers', function(req, res) {
