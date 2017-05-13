@@ -9,39 +9,26 @@
       <h3 class="panel-title">Please fill out the fields below to create your new award.</h3>
     </div>
     <div class="panel-body">
-		<form action=null>
+		<form id="newAward" action="/newAward" method="post">
 			<fieldset>
 
-             	<label for="uid">Select User ID (required):</label>
-             	<select id="uid" name="uid">
-             		{{#each users}}
-                	<option value={{userID}}>{{userID}}</option>
-                	{{/each}}
-              	</select>
-            	</br>
-            	</br>
+        <label for="uid">Select User ID (required):</label>
+        <select id="uid" name="uid">
+          {{#each users}}
+            <option value={{userID}}>{{userID}} - {{fname}} {{lname}}</option>
+          {{/each}}
+        </select>
+        </br>
+        </br>
 
-             	<label for="certType">Select Certificate Type (required):</label>
-             	<select id="certType" name="certType">
-             		{{#each type}}
-                	<option value={{name}}>{{name}}</option>
-                	{{/each}}
-              	</select>
-            	</br>
-            	</br>
-
-				<label for="firstname">Recipient first name:</label>
-				<input type="text" name="firstname" id="firstname"><br><br>
-
-				<label for="lastname">Recipient last name:</label>
-				<input type="text" name="lastname" id="lastname"><br><br>
-
-				<label for="empemail">Recipient email:</label>
-				<input type="text" name="empemail" id="empemail"><br><br>
-
-				<label for="issuer">User Issuing Award:</label>
-				<input type="text" name="issuer" id="issuer">
-				<br><br>
+        <label for="certType">Select Certificate Type (required):</label>
+        <select id="certType" name="certType">
+          {{#each type}}
+            <option value={{certID}}>{{name}}</option>
+          {{/each}}
+        </select>
+        </br>
+        </br>
 
 				<label for="timedate">Time/Date Award Was Issued:</label>
 				<input type="text" name="timedate" id="timedate">
