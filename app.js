@@ -286,8 +286,8 @@ app.get('/createNewAward', function(req, res) {
 
 app.post('/newAward', function(req, res, next) {
   
-  var awardQuery = "INSERT IGNORE INTO empcerts (`userID`, `certID`, `dateAwarded`) VALUES (?, ?, ?)";
-  connection.query(awardQuery, [req.body.uid, req.body.certType, req.body.timedate], function(err,rows){
+  var awardQuery = "INSERT IGNORE INTO empcerts (`userID`, `certID`, `dateAwarded`, `issuerID`) VALUES (?, ?, ?, ?)";
+  connection.query(awardQuery, [req.body.uid, req.body.certType, req.body.timedate, req.user.UserID], function(err,rows){
     if(err){
       next(err);
       return;
