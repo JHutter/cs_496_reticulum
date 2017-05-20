@@ -319,6 +319,18 @@ app.get('/deleteAward', function(req, res) {
     });
 });
 
+//remove an award that was selected for deletion
+app.get('/removeAward', function(req, res, next) {
+
+  connection.query('DELETE FROM empcerts WHERE empCertID = ?', [req.query.sentid], function(err, rows){
+    if(err){
+      next(err);
+      return;
+    }
+    res.redirect('/deleteAward');
+  });
+});
+
 app.get('/manageUsers', function(req, res) {
     var regionQuery = "SELECT * FROM regions";
     connection.query(regionQuery, function(err,rows){
