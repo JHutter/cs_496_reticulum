@@ -1,12 +1,12 @@
 {
-  "name": "LifeBridge",
+  "name": "Reticulum",
   "version": "1.0.0",
-  "description": "V1 of LifeBridge app",
+  "description": "V1 of Reticulum app",
   "main": "app.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
-  "author": "Group8",
+  "author": "ruizry,hatchimg,hutterj",
   "license": "ISC",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
