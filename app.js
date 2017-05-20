@@ -24,6 +24,14 @@ var connection = mysql.createConnection({
   database: 'sql3170049'
 });
 
+var email   = require('emailjs');
+var server  = email.server.connect({
+   user:    "reticulumcs467@gmail.com", 
+   password:"zjoyclakyknditzr", 
+   host:    "smtp.gmail.com", 
+   ssl:     true
+});
+
 connection.query('SELECT * from users', function(err, rows, fields) {
   if (!err)
     console.log('The solution is: ', rows);
@@ -189,18 +197,19 @@ app.get('/', function(req, res) {
   if(req.user)
 	{		
     var context = {};
-    connection.query('SELECT email FROM login where UserID = ?', [req.user.UserID], function(err, rows){
+    connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
       if(err){
         next(err);
         return;
       }
       console.log(rows);
-      res.render('home', {user: req.user, rows: rows});
+      loggedin = rows[0];
+      res.render('home', {loginfo: req.user, user: loggedin});
     });
 	}
 	
 	else
-	{res.render('home', {user: req.user});}
+	{res.render('home', {loginfo: req.user});}
 
   
 });
@@ -230,10 +239,39 @@ app.get('/resetPass', function(req, res){
   res.render('resetPass');
 });
 
-//displays reset password page
 app.post('/newPass', function(req, res){
-  // do something with req.body.acctEmail
-  res.redirect('/');
+  connection.query('SELECT * FROM login WHERE email = ?', [req.body.acctEmail], function(err, rows){
+    if(err){
+      next(err);
+      return;
+    }
+    //check if length is greater than 0, if not return message to user about no email found
+    login = rows[0];
+
+    var randPass = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for(var i = 0; i < 8; i++) {
+      randPass += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    console.log(login.UserID);
+    console.log(randPass);
+
+    connection.query("UPDATE login SET password=? WHERE UserID =?", [randPass, login.UserID], function(err, result){
+      if(err){
+        next(err);
+        return;
+      }
+      server.send({
+        text:    "New password for Reticulum Account: " + randPass, 
+        from:    "reticulumcs467@gmail.com", 
+        to:      login.email,
+        subject: "A Change Has Been Made To Your Reticulum Account"
+      }, function(err, message) { console.log(err || message); });
+    });
+
+    res.redirect('/');
+  });
 });
 
 //sends the request through our local login/signin strategy, and if successful takes user to homepage, otherwise returns then to signin page
@@ -308,7 +346,7 @@ app.get('/changeName', function(req, res, next) {
   });
 });
 
-app.get('/deleteAward', function(req, res) {
+app.get('/deleteAward', function(req, res, next) {
     var awardQuery = "SELECT * FROM empcerts";
     connection.query(awardQuery, function(err,rows){
       if(err){
@@ -317,6 +355,34 @@ app.get('/deleteAward', function(req, res) {
       }
       res.render('deleteAward', {user: req.user, awards: rows});
     });
+});
+
+//send award winner's email
+app.get('/sendAward', function(req, res, next) {
+
+  connection.query('SELECT * FROM empcerts WHERE empCertID = ?', [req.query.sentid], function(err, rows){
+    if(err){
+      next(err);
+      return;
+    }
+    award = rows[0];
+
+    connection.query('SELECT * FROM login WHERE UserID = ?', [award.userID], function(err, rows){
+      if(err){
+        next(err);
+        return;
+      }
+      winner = rows[0];
+      server.send({
+        text:    "Award Type: " + award.certID + " Time Awarded: " + award.dateAwarded + " Award Issued By: " + award.issuerID, 
+        from:    "reticulumcs467@gmail.com", 
+        to:      winner.email,
+        subject: "You have been awarded by Reticulum"
+      }, function(err, message) { console.log(err || message); });
+
+      res.redirect('/deleteAward');
+    });
+  });
 });
 
 //remove an award that was selected for deletion
@@ -364,11 +430,11 @@ app.post('/editProfile', function(req, res, next) {
       next(err);
       return;
     }
-    connection.query("UPDATE login SET isAdmin=? WHERE userID =?", [req.user.isAdmin, req.user.UserID], function(err, result){
+    connection.query("UPDATE login SET isAdmin=? WHERE UserID =?", [req.user.isAdmin, req.user.UserID], function(err, result){
       if(err){
-      next(err);
-      return;
-    }
+        next(err);
+        return;
+      }
     });
   });
 
@@ -386,7 +452,7 @@ app.post('/editAdmins', function(req, res, next) {
     var adminQuery = "INSERT IGNORE INTO admins (`adminID`, `fname`, `lname`) VALUES (?, ?, ?)";
     connection.query(adminQuery, [newID, req.body.fName, req.body.lName], function(err,rows){
       if(err){
-          next(err);
+        next(err);
         return;
       }
     });
@@ -407,7 +473,7 @@ app.post('/editUsers', function(req, res, next) {
     var userQuery = "INSERT IGNORE INTO users (`userID`, `regionID`, `fname`, `lname`) VALUES (?, ?, ?, ?)";
     connection.query(userQuery, [newID, req.body.rid, req.body.fName, req.body.lName], function(err,rows){
       if(err){
-          next(err);
+        next(err);
         return;
       }
     });
