@@ -441,6 +441,8 @@ app.post('/editProfile', function(req, res, next) {
   res.redirect('/');
 });
 
+//Handler for creating a new admin user ===============================================
+
 app.post('/editAdmins', function(req, res, next) {
   var loginQuery = "INSERT IGNORE INTO login (`email`, `password`, `isAdmin`) VALUES (?, ?, ?)";
   connection.query(loginQuery, [req.body.email, req.body.pword, 1], function(err,rows){
@@ -460,6 +462,8 @@ app.post('/editAdmins', function(req, res, next) {
 
   res.redirect('/');
 });
+
+//Handler for creating a new regular user ==================================================
 
 app.post('/editUsers', function(req, res, next) {
   
@@ -481,6 +485,51 @@ app.post('/editUsers', function(req, res, next) {
   res.redirect('/');
 });
 
+//Handler for editing an admin user =======================================================
+
+app.post('/edit-admin-row', function(req, res, next) {
+  
+  var loginQuery = "UPDATE login SET email=? WHERE UserID=?";
+  connection.query(loginQuery, [req.body.email, req.body.UserID], function(err,rows){
+    if(err){
+      next(err);
+      return;
+    }
+
+    var adminsQuery = "UPDATE admins SET fname=?, lname=? WHERE adminID=?";
+    connection.query(adminsQuery, [req.body.fName, req.body.lName, req.body.UserID], function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+    });
+  });
+
+  res.redirect('/');
+});
+
+//Handler for editing a regular user ======================================================
+
+app.post('/edit-user-row', function(req, res, next) {
+  
+  var loginQuery = "UPDATE login SET email=? WHERE UserID=?";
+  connection.query(loginQuery, [req.body.email, req.body.UserID], function(err,rows){
+    if(err){
+      next(err);
+      return;
+    }
+
+    var usersQuery = "UPDATE users SET fname=?, lname=?, regionID=? WHERE userID=?";
+    connection.query(usersQuery, [req.body.fName, req.body.lName, req.body.regionID, req.body.UserID], function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+    });
+  });
+
+  res.redirect('/');
+});
 
 //handler for viewing/deleting regular users=================================
 

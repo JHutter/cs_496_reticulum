@@ -26,9 +26,6 @@ req.addEventListener('load', function(){
 }
 
 
-
-
-
 function bindDelete(theButtons){
 	
 	for (i = 0; i < theButtons.length; i++){
@@ -61,7 +58,43 @@ function deleteRow(theRow){
 	});
 	req.send(null);
 }
+
+function bindEdit(theButtons){
 	
+		theButtons.addEventListener("click", function(){
+			editRow(theButtons.attributes.userid.value);		
+		});
+	};
+
+
+function editRow(theID){
+	
+	var theRow = document.getElementById(theID);
+	var email = theRow.cells[4].innerHTML;
+	var fname = theRow.cells[3].innerHTML;
+	var lname = theRow.cells[2].innerHTML;
+	var region = theRow.cells[0].innerHTML;
+	
+	var req = new XMLHttpRequest();
+	var data = "UserID=" + theID + "&email=" + email + "&fName=" + fname + "&lName=" + lname + "&regionID=" + region;
+	req.open("POST", "http://localhost:50000/edit-user-row", true);
+
+	
+	req.addEventListener('load', function(){
+	if(req.status >= 200 && req.status < 400)
+	{
+		var res = JSON.parse(req.responseText);
+		createTable(res);
+	}
+	else{
+		console.log("Error in network request: " + req.statusText);
+	}
+	
+	});
+
+	req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	req.send(data);
+}
 	
 function createTable(info){
 
@@ -75,18 +108,46 @@ if(document.getElementById("myTable"))
 	var newRow = document.createElement("TR");
 	newRow.setAttribute("name", "datarow");
 	newRow.setAttribute("UserID", info[p].UserID);
+	newRow.setAttribute("id", info[p].UserID);
 	
 	
 		for(r in info[p]){
 			if(r == "userID" || r == "password" || r == "isAdmin" || r == "UserID"){}
 			else{
-			var newCell = document.createElement("TD");
-			newCell.textContent = info[p][r];
-			newRow.appendChild(newCell);
+				var newCell = document.createElement("TD");
+				if(r == "timeCreated" || r == "signature"){}
+				else
+					newCell.setAttribute("contenteditable", "true");
+			
+				newCell.textContent = info[p][r];
+				if(r == "email"){
+					newCell.setAttribute("name", "email");
+					newCell.setAttribute("email", info[p][r]);
+				}
+				if(r == "fname"){
+					newCell.setAttribute("name", "fname");
+					newCell.setAttribute("fname", info[p][r]);
+				}
+				if(r == "lname"){
+					newCell.setAttribute("name", "lname");
+					newCell.setAttribute("lname", info[p][r]);
+				}
+				if(r == "regionID"){
+					newCell.setAttribute("name", "regionID");
+					newCell.setAttribute("regionID", info[p][r]);
+				}
+				
+				newRow.appendChild(newCell);
 			}
 		}
-	
-
+		
+		var editButton = document.createElement("Input");
+		
+		editButton.setAttribute("name", "editButton");
+		editButton.setAttribute("type", "button");
+		editButton.setAttribute("UserID", info[p].UserID);
+		editButton.value = "Edit User";
+		
 		var deleteButton = document.createElement("Input");
 
 		
@@ -96,11 +157,12 @@ if(document.getElementById("myTable"))
 		deleteButton.value = "Delete User";
 
 
-		
+		newRow.appendChild(editButton);		
 		newRow.appendChild(deleteButton);
 
 
 		document.getElementById("myTable").appendChild(newRow);
+		bindEdit(editButton);
 	}
 
 
