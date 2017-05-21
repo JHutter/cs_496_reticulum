@@ -204,7 +204,7 @@ app.get('/', function(req, res) {
       }
       console.log(rows);
       loggedin = rows[0];
-      res.render('home', {loginfo: req.user, user: loggedin});
+      res.render('home', {user: req.user, userinfo: loggedin});
     });
 	}
 	
