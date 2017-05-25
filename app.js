@@ -349,8 +349,9 @@ app.get('/changeName', function(req, res, next) {
 });
 
 app.get('/deleteAward', function(req, res, next) {
-    var awardQuery = "SELECT * FROM empcerts";
-    connection.query(awardQuery, function(err,rows){
+    //var awardQuery = "SELECT * FROM empcerts";
+    //connection.query('SELECT users.userID, empCertID, users.fname, users.lname, regions.regionName, dateAwarded, certtypes.name FROM certtypes INNER JOIN empcerts ON empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID GROUP BY empCertID', function(err, rows){
+    connection.query('SELECT * FROM certtypes INNER JOIN empcerts on empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID GROUP BY empcerts.empCertID', function(err, rows){
       if(err){
         next(err);
         return;
@@ -362,7 +363,8 @@ app.get('/deleteAward', function(req, res, next) {
 //send award winner's email
 app.get('/sendAward', function(req, res, next) {
 
-  connection.query('SELECT * FROM empcerts WHERE empCertID = ?', [req.query.sentid], function(err, rows){
+  //connection.query('SELECT * FROM empcerts WHERE empCertID = ?', [req.query.sentid], function(err, rows){
+    connection.query('SELECT * FROM certtypes INNER JOIN empcerts on empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID WHERE empCertID = ? GROUP BY empcerts.empCertID', [req.query.sentid], function(err, rows){
     if(err){
       next(err);
       return;
@@ -376,7 +378,7 @@ app.get('/sendAward', function(req, res, next) {
       }
       winner = rows[0];
       server.send({
-        text:    "Award Type: " + award.certID + " Time Awarded: " + award.dateAwarded + " Award Issued By: " + award.issuerID, 
+        text:    "Congratulations " + award.fname + " " + award.lname + ", you have won the following award at Reticulum - " + award.name + " - for the following time period: " + award.dateAwarded + ". Award Issued By: " + award.issuerID, 
         from:    "reticulumcs467@gmail.com", 
         to:      winner.email,
         subject: "You have been awarded by Reticulum"
