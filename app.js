@@ -377,14 +377,21 @@ app.get('/sendAward', function(req, res, next) {
         return;
       }
       winner = rows[0];
-      server.send({
-        text:    "Congratulations " + award.fname + " " + award.lname + ", you have won the following award at Reticulum - " + award.name + " - for the following time period: " + award.dateAwarded + ". Award Issued By: " + award.issuerID, 
-        from:    "reticulumcs467@gmail.com", 
-        to:      winner.email,
-        subject: "You have been awarded by Reticulum"
-      }, function(err, message) { console.log(err || message); });
+      connection.query('SELECT * FROM users WHERE userID = ?', [award.issuerID], function(err, rows){
+        if(err){
+          next(err);
+          return;
+        }
+        issuer = rows[0];
+        server.send({
+          text:    "Congratulations " + award.fname + " " + award.lname + ", you have won the following award at Reticulum - " + award.name + " - for the following time period: " + award.dateAwarded + ". Award Issued By: " + issuer.fname + " " + issuer.lname, 
+          from:    "reticulumcs467@gmail.com", 
+          to:      winner.email,
+          subject: "You have been awarded by Reticulum"
+        }, function(err, message) { console.log(err || message); });
 
-      res.redirect('/deleteAward');
+        res.redirect('/deleteAward');
+      });
     });
   });
 });
