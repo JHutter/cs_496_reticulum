@@ -10,8 +10,13 @@
     <div class="panel-body">
 	  <div class="col-md-3 col-lg-3 " align="center"> <img alt="User Pic" src="https://www.justpark.com/media/img/misc/avatar-st.png" class="img-circle img-responsive"> </div>
     </label>
+	  {{#if user.isAdmin}}
+	  <p>Name: {{admininfo.fname}} {{admininfo.lname}}</p>
+      <p>Username: {{user.email}}</p>
+	  {{else}}
 	  <p>Name: {{userinfo.fname}} {{userinfo.lname}}</p>
       <p>Username: {{user.email}}</p>
+	  {{/if}}
     </div>
   </div>
 

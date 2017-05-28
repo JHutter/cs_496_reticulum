@@ -139,6 +139,7 @@ if(document.getElementById("myTable"))
 				if(r == "signature"){
 					var img = document.createElement("img");
 					img.src = info[p][r];
+					img.alt = "No image URL on file";
 					img.style.width = '25%';
 					img.style.height = 'auto';
 					newCell.appendChild(img);

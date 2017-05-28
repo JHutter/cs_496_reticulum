@@ -206,7 +206,14 @@ app.get('/', function(req, res) {
       }
       console.log(rows);
       loggedin = rows[0];
-      res.render('home', {user: req.user, userinfo: loggedin});
+	connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+	  if(err){
+		next(err);
+		return;
+	  }
+	  adminloggedin = rows[0];
+      res.render('home', {user: req.user, admininfo: adminloggedin, userinfo: loggedin});
+	});
     });
 	}
 	
@@ -434,24 +441,50 @@ app.get('/removeAward', function(req, res, next) {
 });
 
 app.get('/manageUsers', function(req, res) {
-    var regionQuery = "SELECT * FROM regions";
-    connection.query(regionQuery, function(err,rows){
+	
+  connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
+  
+  var regionQuery = "SELECT * FROM regions";
+  connection.query(regionQuery, function(err,rows){
       if(err){
         next(err);
         return;
       }
-      res.render('manageUsers', {user: req.user, regions: rows});
+      res.render('manageUsers', {user: req.user, admininfo: loggedin, regions: rows});
     });
+  });
 });
 
 app.get('/manageAdmins', function(req, res) {
-  res.render('manageAdmins', {user: req.user});
+
+  connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
+  
+  res.render('manageAdmins', {user: req.user, admininfo: loggedin});
+  });
 });
 
 app.get('/BIoperations', function(req, res) {
-  queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
-  res.render('BIoperations', {user: req.user, sampleQ: queries});
 
+  connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
+  
+  queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
+  res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
+  });
 });
 
 app.get('/BIquery', function(req, res) {	
@@ -510,8 +543,8 @@ app.post('/editUsers', function(req, res, next) {
       return;
     }
     var newID = rows.insertId
-    var userQuery = "INSERT IGNORE INTO users (`userID`, `regionID`, `fname`, `lname`) VALUES (?, ?, ?, ?)";
-    connection.query(userQuery, [newID, req.body.rid, req.body.fName, req.body.lName], function(err,rows){
+    var userQuery = "INSERT IGNORE INTO users (`userID`, `regionID`, `fname`, `lname`, `signature`) VALUES (?, ?, ?, ?, ?)";
+    connection.query(userQuery, [newID, req.body.rid, req.body.fName, req.body.lName, req.body.signature], function(err,rows){
       if(err){
         next(err);
         return;
