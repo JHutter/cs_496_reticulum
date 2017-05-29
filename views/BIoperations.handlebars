@@ -65,9 +65,7 @@
 	}
 
 	function bindSubmitButton(){
-		console.log("Just wanna let you know I felt that");
 		document.getElementById('submit').addEventListener('click', function(event){
-			console.log("And that too");
 			event.preventDefault();	
 			var req = new XMLHttpRequest();
 			var queryType = document.getElementById("query").value;
