@@ -9,18 +9,115 @@
     <div class="panel-body">
 		<p>How would you like to query your data?</p>		
 		
-		<form action='/BIquery'>
+		<form>
 			<fieldset>
 				<br>
 				<label for="query">Select Sample Query:</label>
-						<select id="SampleQuery" name="SampleQuery" >
+						<select id="query" name="query" >
 							{{#each sampleQ}}
 							<option value={{query}}>{{textQ}}</option>
 							{{/each}}
 						</select>
 						</br>
-				<input type="submit" id="BIquery" value="Submit">
+				<input type="submit" id="submit" value="Submit">
 			</fieldset>
 		</form>
+		
+		<br>
+		<br>
+		<div id="chart_div"></div>
+		
 	</div>
 </div>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+	google.charts.load('current', {packages: ['corechart', 'bar']});
+	google.charts.setOnLoadCallback(drawBarColors);
+	function drawBarColors() {
+	  var data = google.visualization.arrayToDataTable([
+		['City', '2010 Population'],
+		['New York City, NY', 8175000],
+		['Los Angeles, CA', 3792000],
+		['Chicago, IL', 2695000],
+		['Houston, TX', 2099000],
+		['Philadelphia, PA', 1526000]
+	  ]);
+	  //var data = google.visualization.arrayToDataTable(newData);
+
+	  var options = {
+		title: 'Employees Who Have Created Awards',
+		chartArea: {width: '50%'},
+		colors: ['#b0120a', '#ffab91'],
+		hAxis: {
+		  title: 'Number of Awards',
+		  minValue: 0
+		},
+		vAxis: {
+		  title: 'Name'
+		}
+	  };
+	  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+	  chart.draw(data, options);
+	}
+
+	function bindSubmitButton(){
+		console.log("Just wanna let you know I felt that");
+		document.getElementById('submit').addEventListener('click', function(event){
+			console.log("And that too");
+			event.preventDefault();	
+			var req = new XMLHttpRequest();
+			var queryType = document.getElementById("query").value;
+			//var baseURL = 'http://sample-env-1.ika8zhqiie.us-west-2.elasticbeanstalk.com/BIquery?';
+			var baseURL = 'http://localhost:50000/BIquery';
+			var signature = baseURL + '?query=' + queryType;
+			
+			req.open("POST", baseURL, true);
+			req.setRequestHeader('Content-Type', 'application/json');			
+			req.addEventListener('load',function(){
+				if(req.status >= 200 && req.status < 400){
+					var response = JSON.parse(req.responseText);
+					console.log(response);
+					// display the chart
+					/*var data = google.visualization.arrayToDataTable([
+						['City', '2010 Population'],
+						['New York City, NY', 8175000],
+						['Los Angeles, CA', 3792000],
+						['Chicago, IL', 2695000],
+						['Houston, TX', 2099000],
+						['Philadelphia, PA', 1526000]
+					  ]);*/
+					  var newData = [];
+					  for (var i in response){
+							newData.push([response[i].name, response[i].awardCount]);
+					  }
+					  var data = google.visualization.arrayToDataTable(newData);
+
+					  var options = {
+						title: 'Employees Who Have Created Awards',
+						chartArea: {width: '50%'},
+						colors: ['#b0120a', '#ffab91'],
+						hAxis: {
+						  title: 'Number of Awards',
+						  minValue: 0
+						},
+						vAxis: {
+						  title: 'Name'
+						}
+					  };
+					  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+					  chart.draw(data, options);
+					
+					
+				} 
+				else {
+					console.log("Error: " + request.statusText);
+				}
+			});
+			var sentObject = {"query": queryType};
+			req.send(JSON.stringify(sentObject));
+		})
+	}
+	document.addEventListener('DOMContentLoaded', bindSubmitButton);
+	
+</script>
+

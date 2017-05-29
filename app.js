@@ -429,9 +429,23 @@ app.get('/BIoperations', function(req, res) {
 
 });
 
-app.get('/BIquery', function(req, res) {	
-  res.render('BIquery', {user: req.user});
+app.post('/BIquery', function(req, res) {	
+  // source: https://vmokshagroup.com/blog/building-restful-apis-using-node-js-express-js-and-ms-sql-server/
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, contentType,Content-Type, Accept, Authorization");
+  res.type('application/json');
 
+  var queryCode = req.body.query;
+  var BIQuery = "SELECT concat(fname, ' ', lname) as name, 10 as awardCount FROM users";
+    connection.query(BIQuery, function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+	  //console.log(rows);
+	  res.send(rows);
+    });  
 });
 
 app.post('/editProfile', function(req, res, next) {
