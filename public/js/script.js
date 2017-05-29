@@ -118,8 +118,8 @@ if(document.getElementById("myTable"))
 				if(r == "timeCreated" || r == "signature"){}
 				else
 					newCell.setAttribute("contenteditable", "true");
-			
-				newCell.textContent = info[p][r];
+				if(r != "signature")
+					newCell.textContent = info[p][r];
 				if(r == "email"){
 					newCell.setAttribute("name", "email");
 					newCell.setAttribute("email", info[p][r]);
@@ -136,7 +136,14 @@ if(document.getElementById("myTable"))
 					newCell.setAttribute("name", "regionID");
 					newCell.setAttribute("regionID", info[p][r]);
 				}
-				
+				if(r == "signature"){
+					var img = document.createElement("img");
+					img.src = info[p][r];
+					img.alt = "No image URL on file";
+					img.style.width = '25%';
+					img.style.height = 'auto';
+					newCell.appendChild(img);
+				}
 				newRow.appendChild(newCell);
 			}
 		}

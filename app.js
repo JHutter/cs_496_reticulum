@@ -206,7 +206,14 @@ app.get('/', function(req, res) {
       }
       console.log(rows);
       loggedin = rows[0];
-      res.render('home', {user: req.user, userinfo: loggedin});
+	connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+	  if(err){
+		next(err);
+		return;
+	  }
+	  adminloggedin = rows[0];
+      res.render('home', {user: req.user, admininfo: adminloggedin, userinfo: loggedin});
+	});
     });
 	}
 	
@@ -305,6 +312,13 @@ app.get('/logout', function(req, res){
 
 
 app.get('/createNewAward', function(req, res) {
+  
+  connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
   // search for all employees
   var uQuery = "SELECT * FROM users";
   connection.query(uQuery, function(err,rows){
@@ -319,9 +333,10 @@ app.get('/createNewAward', function(req, res) {
         next(err);
         return;
       }
-      res.render('createNewAward', {user: req.user, users: users, type: rows});
+      res.render('createNewAward', {user: req.user, users: users, userinfo: loggedin, type: rows});
     });
   });
+});
 });
 
 app.post('/newAward', function(req, res, next) {
@@ -337,27 +352,44 @@ app.post('/newAward', function(req, res, next) {
 });
 
 app.get('/changeName', function(req, res, next) {
+
+  connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
   var ID = req.user.UserID;
-  connection.query('SELECT fname, lname FROM users WHERE userID = ?', [ID], function(err, rows){
+  connection.query('SELECT fname, lname, signature FROM users WHERE userID = ?', [ID], function(err, rows){
     if(err){
       next(err);
       return;
     }
     name = rows[0];
-    res.render('changeName', {user: req.user, name: name});
+    res.render('changeName', {user: req.user, name: name, userinfo: loggedin, signature: name});
+  });
   });
 });
 
 app.get('/deleteAward', function(req, res, next) {
     //var awardQuery = "SELECT * FROM empcerts";
     //connection.query('SELECT users.userID, empCertID, users.fname, users.lname, regions.regionName, dateAwarded, certtypes.name FROM certtypes INNER JOIN empcerts ON empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID GROUP BY empCertID', function(err, rows){
+	
+connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
+  
     connection.query('SELECT * FROM certtypes INNER JOIN empcerts on empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID GROUP BY empcerts.empCertID', function(err, rows){
       if(err){
         next(err);
         return;
       }
-      res.render('deleteAward', {user: req.user, awards: rows});
+      res.render('deleteAward', {user: req.user, userinfo: loggedin, awards: rows});
     });
+});
 });
 
 //send award winner's email
@@ -409,24 +441,50 @@ app.get('/removeAward', function(req, res, next) {
 });
 
 app.get('/manageUsers', function(req, res) {
-    var regionQuery = "SELECT * FROM regions";
-    connection.query(regionQuery, function(err,rows){
+	
+  connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
+  
+  var regionQuery = "SELECT * FROM regions";
+  connection.query(regionQuery, function(err,rows){
       if(err){
         next(err);
         return;
       }
-      res.render('manageUsers', {user: req.user, regions: rows});
+      res.render('manageUsers', {user: req.user, admininfo: loggedin, regions: rows});
     });
+  });
 });
 
 app.get('/manageAdmins', function(req, res) {
-  res.render('manageAdmins', {user: req.user});
+
+  connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
+  
+  res.render('manageAdmins', {user: req.user, admininfo: loggedin});
+  });
 });
 
 app.get('/BIoperations', function(req, res) {
-  queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
-  res.render('BIoperations', {user: req.user, sampleQ: queries});
 
+  connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
+  
+  queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
+  res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
+  });
 });
 
 app.post('/BIquery', function(req, res) {	
@@ -499,8 +557,8 @@ app.post('/editUsers', function(req, res, next) {
       return;
     }
     var newID = rows.insertId
-    var userQuery = "INSERT IGNORE INTO users (`userID`, `regionID`, `fname`, `lname`) VALUES (?, ?, ?, ?)";
-    connection.query(userQuery, [newID, req.body.rid, req.body.fName, req.body.lName], function(err,rows){
+    var userQuery = "INSERT IGNORE INTO users (`userID`, `regionID`, `fname`, `lname`, `signature`) VALUES (?, ?, ?, ?, ?)";
+    connection.query(userQuery, [newID, req.body.rid, req.body.fName, req.body.lName, req.body.signature], function(err,rows){
       if(err){
         next(err);
         return;
