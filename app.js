@@ -218,7 +218,7 @@ app.get('/', function(req, res) {
 	}
 	
 	else
-	{res.render('home', {loginfo: req.user});}
+    {res.render('home');}
 
   
 });
@@ -254,32 +254,40 @@ app.post('/newPass', function(req, res){
       next(err);
       return;
     }
+
     //check if length is greater than 0, if not return message to user about no email found
-    login = rows[0];
+    if (rows.length) {
+      login = rows[0];
 
-    var randPass = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for(var i = 0; i < 8; i++) {
-      randPass += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-
-    console.log(login.UserID);
-    console.log(randPass);
-
-    connection.query("UPDATE login SET password=? WHERE UserID =?", [randPass, login.UserID], function(err, result){
-      if(err){
-        next(err);
-        return;
+      var randPass = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      for(var i = 0; i < 8; i++) {
+        randPass += possible.charAt(Math.floor(Math.random() * possible.length));
       }
-      server.send({
-        text:    "New password for Reticulum Account: " + randPass, 
-        from:    "reticulumcs467@gmail.com", 
-        to:      login.email,
-        subject: "A Change Has Been Made To Your Reticulum Account"
-      }, function(err, message) { console.log(err || message); });
-    });
 
-    res.redirect('/');
+      console.log(login.UserID);
+      console.log(randPass);
+
+      connection.query("UPDATE login SET password=? WHERE UserID =?", [randPass, login.UserID], function(err, result){
+        if(err){
+          next(err);
+          return;
+        }
+        server.send({
+          text:    "New password for Reticulum Account: " + randPass, 
+          from:    "reticulumcs467@gmail.com", 
+          to:      login.email,
+          subject: "A Change Has Been Made To Your Reticulum Account"
+        }, function(err, message) { console.log(err || message); });
+      });
+
+      var status = "Email Sent With New Password";
+      res.render('resetRedirect', {notify: status});
+    }
+    else {
+      var status = "No User Found";
+      res.render('resetRedirect', {notify: status});
+    }
   });
 });
 
@@ -303,40 +311,47 @@ app.post('/login', passport.authenticate('local-signin', {
 
 //logs user out of site, deleting them from the session, and returns to homepage
 app.get('/logout', function(req, res){
-  var uname = req.user.email;
-  console.log("LOGGIN OUT " + uname);
-  req.logout();
-  res.redirect('/');
-  req.session.notice = "You have successfully been logged out " + uname + "!";
+  if(req.user) {
+    var uname = req.user.email;
+    console.log("LOGGIN OUT " + uname);
+    req.logout();
+    res.redirect('/');
+    req.session.notice = "You have successfully been logged out " + uname + "!";
+  }
+  else
+    {res.render('home');}
 });
 
 
 app.get('/createNewAward', function(req, res) {
-  
+ if(req.user) {
   connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
-  if(err){
-	next(err);
-	return;
-  }
-  loggedin = rows[0];
-  // search for all employees
-  var uQuery = "SELECT * FROM users";
-  connection.query(uQuery, function(err,rows){
     if(err){
       next(err);
       return;
     }
-    users = rows;
-    var typeQuery = "SELECT * FROM certtypes";
-    connection.query(typeQuery, function(err,rows){
+    loggedin = rows[0];
+    // search for all employees
+    var uQuery = "SELECT * FROM users";
+    connection.query(uQuery, function(err,rows){
       if(err){
         next(err);
         return;
       }
-      res.render('createNewAward', {user: req.user, users: users, userinfo: loggedin, type: rows});
+      users = rows;
+      var typeQuery = "SELECT * FROM certtypes";
+      connection.query(typeQuery, function(err,rows){
+        if(err){
+          next(err);
+          return;
+        }
+        res.render('createNewAward', {user: req.user, users: users, userinfo: loggedin, type: rows});
+      });
     });
   });
-});
+ }
+ else
+  {res.render('home');}
 });
 
 app.post('/newAward', function(req, res, next) {
@@ -352,35 +367,39 @@ app.post('/newAward', function(req, res, next) {
 });
 
 app.get('/changeName', function(req, res, next) {
-
-  connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
-  if(err){
-	next(err);
-	return;
+  if(req.user)
+  {
+    connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
+      if(err){
+	       next(err);
+	       return;
+      }
+      loggedin = rows[0];
+      var ID = req.user.UserID;
+      connection.query('SELECT fname, lname, signature FROM users WHERE userID = ?', [ID], function(err, rows){
+        if(err){
+          next(err);
+          return;
+        }
+        name = rows[0];
+        res.render('changeName', {user: req.user, name: name, userinfo: loggedin, signature: name});
+      });
+    });
   }
-  loggedin = rows[0];
-  var ID = req.user.UserID;
-  connection.query('SELECT fname, lname, signature FROM users WHERE userID = ?', [ID], function(err, rows){
-    if(err){
-      next(err);
-      return;
-    }
-    name = rows[0];
-    res.render('changeName', {user: req.user, name: name, userinfo: loggedin, signature: name});
-  });
-  });
+  else
+    {res.render('home');}
 });
 
 app.get('/deleteAward', function(req, res, next) {
     //var awardQuery = "SELECT * FROM empcerts";
     //connection.query('SELECT users.userID, empCertID, users.fname, users.lname, regions.regionName, dateAwarded, certtypes.name FROM certtypes INNER JOIN empcerts ON empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID GROUP BY empCertID', function(err, rows){
-	
-connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
-  if(err){
-	next(err);
-	return;
-  }
-  loggedin = rows[0];
+ if(req.user) {
+  connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
+    if(err){
+      next(err);
+      return;
+    }
+    loggedin = rows[0];
   
     connection.query('SELECT * FROM certtypes INNER JOIN empcerts on empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID GROUP BY empcerts.empCertID', function(err, rows){
       if(err){
@@ -389,12 +408,15 @@ connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], func
       }
       res.render('deleteAward', {user: req.user, userinfo: loggedin, awards: rows});
     });
-});
+  });
+ }
+ else
+  {res.render('home');}
 });
 
 //send award winner's email
 app.get('/sendAward', function(req, res, next) {
-
+ if(req.user) {
   //connection.query('SELECT * FROM empcerts WHERE empCertID = ?', [req.query.sentid], function(err, rows){
     connection.query('SELECT * FROM certtypes INNER JOIN empcerts on empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID WHERE empCertID = ? GROUP BY empcerts.empCertID', [req.query.sentid], function(err, rows){
     if(err){
@@ -426,11 +448,14 @@ app.get('/sendAward', function(req, res, next) {
       });
     });
   });
+ }
+ else
+  {res.render('home');}
 });
 
 //remove an award that was selected for deletion
 app.get('/removeAward', function(req, res, next) {
-
+ if(req.user) {
   connection.query('DELETE FROM empcerts WHERE empCertID = ?', [req.query.sentid], function(err, rows){
     if(err){
       next(err);
@@ -438,10 +463,13 @@ app.get('/removeAward', function(req, res, next) {
     }
     res.redirect('/deleteAward');
   });
+ }
+ else
+  {res.render('home');}
 });
 
 app.get('/manageUsers', function(req, res) {
-	
+ if(req.user) {
   connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
   if(err){
 	next(err);
@@ -458,10 +486,13 @@ app.get('/manageUsers', function(req, res) {
       res.render('manageUsers', {user: req.user, admininfo: loggedin, regions: rows});
     });
   });
+ }
+ else
+  {res.render('home');}
 });
 
 app.get('/manageAdmins', function(req, res) {
-
+ if(req.user) {
   connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
   if(err){
 	next(err);
@@ -471,12 +502,18 @@ app.get('/manageAdmins', function(req, res) {
   
   res.render('manageAdmins', {user: req.user, admininfo: loggedin});
   });
+ }
+ else
+  {res.render('home');}
 });
 
 app.get('/BIoperations', function(req, res) {
+ if(req.user) {
   queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
   res.render('BIoperations', {user: req.user, sampleQ: queries});
-
+ }
+ else
+  {res.render('home');}
 });
 
 app.post('/BIquery', function(req, res) {	
