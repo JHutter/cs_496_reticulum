@@ -32,6 +32,9 @@ var server  = email.server.connect({
    ssl:     true
 });
 
+var pdf = require('handlebars-pdf');
+var Promise = require('promise');
+
 connection.query('SELECT * from users', function(err, rows, fields) {
   if (!err)
     console.log('The solution is: ', rows);
@@ -445,14 +448,49 @@ app.get('/sendAward', function(req, res, next) {
           return;
         }
         issuer = rows[0];
+
+        var awardpath = "./awards/award_"+Math.random()+".pdf"
+        var document = {
+            template: '</br></br></br></br></br><h3 align="center">{{msg1}}</h3></br><h1 align="center">{{msg2}}</h1><h3 align="center">{{msg4}}</h3>'+
+            '</br></br></br></br></br></br></br></br></br></br></br></br><img align="right" height="60" width="168" style="margin-right:10em;" src={{sig}} />'+
+            '</br></br></br><h6 align="right" style="margin-right:10em;">{{msg3}}</h6>',
+            context: {
+            msg1: 'Reticulum Awards',
+            msg2: award.name,
+            msg3: award.dateAwarded,
+            msg4: "to " + award.fname + " " + award.lname,
+            sig: issuer.signature
+            },
+            path: awardpath
+        }
+ 
+        pdf.create(document)
+          .then(res => {
+            console.log(res)
+          })
+          .catch(error => {
+            console.error(error)
+          })
+
+        function sendEmail() {
         server.send({
           text:    "Congratulations " + award.fname + " " + award.lname + ", you have won the following award at Reticulum - " + award.name + " - for the following time period: " + award.dateAwarded + ". Award Issued By: " + issuer.fname + " " + issuer.lname, 
           from:    "reticulumcs467@gmail.com", 
           to:      winner.email,
-          subject: "You have been awarded by Reticulum"
+          subject: "You have been awarded by Reticulum",
+          attachment: 
+          [
+            {data:"<html>Your Award</html>", alternative:true},
+            {path:awardpath, type:"application/pdf", name:"award.pdf"}
+          ]
         }, function(err, message) { console.log(err || message); });
 
-        res.redirect('/deleteAward');
+        }
+
+        setTimeout(sendEmail, 5000);
+
+        var status = "Award Email Sent";
+        res.render('awardRedirect', {notify: status});
       });
     });
   });
