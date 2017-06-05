@@ -206,14 +206,17 @@ app.get('/', function(req, res) {
       }
       console.log(rows);
       loggedin = rows[0];
-	connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
-	  if(err){
-		next(err);
-		return;
-	  }
-	  adminloggedin = rows[0];
-      res.render('home', {user: req.user, admininfo: adminloggedin, userinfo: loggedin});
-	});
+      if(loggedin.signature.length == 0) {
+        loggedin.signature = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
+      }
+      connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+        if(err){
+          next(err);
+          return;
+        }
+        adminloggedin = rows[0];
+        res.render('home', {user: req.user, admininfo: adminloggedin, userinfo: loggedin});
+      });
     });
 	}
 	
@@ -381,8 +384,13 @@ app.get('/changeName', function(req, res, next) {
           next(err);
           return;
         }
+        var hasSig = 1;
+        var noSig = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
         name = rows[0];
-        res.render('changeName', {user: req.user, name: name, userinfo: loggedin, signature: name});
+        if(name.signature.length == 0) {
+          hasSig = 0;
+        }
+        res.render('changeName', {user: req.user, name: name, userinfo: loggedin, signature: name, hasSig: hasSig, noSig: noSig});
       });
     });
   }
@@ -536,18 +544,12 @@ app.post('/BIquery', function(req, res) {
 });
 
 app.post('/editProfile', function(req, res, next) {
-  connection.query("UPDATE users SET fname=?, lname=? WHERE userID =?", [req.body.newFName, req.body.newLName, req.user.UserID], function(err, result){
+  connection.query("UPDATE users SET fname=?, lname=?, signature=? WHERE userID =?", [req.body.newFName, req.body.newLName, req.body.newSig, req.user.UserID], function(err, result){
 
     if(err){
       next(err);
       return;
     }
-    connection.query("UPDATE login SET isAdmin=? WHERE UserID =?", [req.user.isAdmin, req.user.UserID], function(err, result){
-      if(err){
-        next(err);
-        return;
-      }
-    });
   });
 
   res.redirect('/');
