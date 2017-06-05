@@ -474,8 +474,17 @@ app.get('/manageAdmins', function(req, res) {
 });
 
 app.get('/BIoperations', function(req, res) {
+
+  connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+  if(err){
+	next(err);
+	return;
+  }
+  loggedin = rows[0];
+  
   queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
-  res.render('BIoperations', {user: req.user, sampleQ: queries});
+  res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
+  });
 
 });
 
