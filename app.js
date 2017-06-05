@@ -209,9 +209,9 @@ app.get('/', function(req, res) {
       }
       console.log(rows);
       loggedin = rows[0];
-      if(loggedin.signature.length == 0) {
-        loggedin.signature = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
-      }
+      //if(loggedin.signature.length == 0) {
+        //loggedin.signature = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
+      //}
       connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
         if(err){
           next(err);
@@ -554,7 +554,7 @@ app.get('/manageAdmins', function(req, res) {
 });
 
 app.get('/BIoperations', function(req, res) {
-<<<<<<< HEAD
+
 
   connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
   if(err){
@@ -567,14 +567,7 @@ app.get('/BIoperations', function(req, res) {
   res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
   });
 
-=======
- if(req.user) {
-  queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
-  res.render('BIoperations', {user: req.user, sampleQ: queries});
- }
- else
-  {res.render('home');}
->>>>>>> origin/master
+
 });
 
 app.post('/BIquery', function(req, res) {	
@@ -718,7 +711,8 @@ app.get("/regUsers", function(req, res, next){
 
 app.get("/delete-row", function(req, res, next){
 	
-	connection.query("DELETE FROM users WHERE userID=?", [req.query.UserID], function(err, rows, fields){
+	
+	connection.query("DELETE FROM users, empcerts WHERE userID=?", [req.query.UserID], function(err, rows, fields){
 		if(err){
 			next(err);
 			return;
@@ -731,6 +725,7 @@ app.get("/delete-row", function(req, res, next){
 			return;
 		}
 	});
+	
 	
 	connection.query("SELECT * FROM users INNER JOIN login on users.userID = login.UserID WHERE login.isAdmin = 0", function(err, rows, fields){
 		if(err){
