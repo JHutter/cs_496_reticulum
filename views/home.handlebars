@@ -8,12 +8,12 @@
       <h3 class="panel-title">Profile Information</h3>
     </div>
     <div class="panel-body">
-	  <div class="col-md-3 col-lg-3 " align="center"> <img alt="User Pic" src="https://www.justpark.com/media/img/misc/avatar-st.png" class="img-circle img-responsive"> </div>
-    </label>
-	  {{#if user.isAdmin}}
+    {{#if user.isAdmin}}
+	  <div class="col-md-3 col-lg-3 " align="center"> <img alt="Admin Signature" src="https://drive.google.com/uc?id=0B_4RP0qw1BEINGVKekMteWd1Tnc" class="img-responsive"> </div>
 	  <p>Name: {{admininfo.fname}} {{admininfo.lname}}</p>
       <p>Username: {{user.email}}</p>
 	  {{else}}
+    <div class="col-md-3 col-lg-3 " align="center"> <img alt="User Signature" src={{userinfo.signature}} class="img-responsive"> </div>
 	  <p>Name: {{userinfo.fname}} {{userinfo.lname}}</p>
       <p>Username: {{user.email}}</p>
 	  {{/if}}

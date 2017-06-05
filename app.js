@@ -32,6 +32,9 @@ var server  = email.server.connect({
    ssl:     true
 });
 
+var pdf = require('handlebars-pdf');
+var Promise = require('promise');
+
 connection.query('SELECT * from users', function(err, rows, fields) {
   if (!err)
     console.log('The solution is: ', rows);
@@ -206,19 +209,22 @@ app.get('/', function(req, res) {
       }
       console.log(rows);
       loggedin = rows[0];
-	connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
-	  if(err){
-		next(err);
-		return;
-	  }
-	  adminloggedin = rows[0];
-      res.render('home', {user: req.user, admininfo: adminloggedin, userinfo: loggedin});
-	});
+      if(loggedin.signature.length == 0) {
+        loggedin.signature = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
+      }
+      connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
+        if(err){
+          next(err);
+          return;
+        }
+        adminloggedin = rows[0];
+        res.render('home', {user: req.user, admininfo: adminloggedin, userinfo: loggedin});
+      });
     });
 	}
 	
 	else
-	{res.render('home', {loginfo: req.user});}
+    {res.render('home');}
 
   
 });
@@ -254,32 +260,40 @@ app.post('/newPass', function(req, res){
       next(err);
       return;
     }
+
     //check if length is greater than 0, if not return message to user about no email found
-    login = rows[0];
+    if (rows.length) {
+      login = rows[0];
 
-    var randPass = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for(var i = 0; i < 8; i++) {
-      randPass += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-
-    console.log(login.UserID);
-    console.log(randPass);
-
-    connection.query("UPDATE login SET password=? WHERE UserID =?", [randPass, login.UserID], function(err, result){
-      if(err){
-        next(err);
-        return;
+      var randPass = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      for(var i = 0; i < 8; i++) {
+        randPass += possible.charAt(Math.floor(Math.random() * possible.length));
       }
-      server.send({
-        text:    "New password for Reticulum Account: " + randPass, 
-        from:    "reticulumcs467@gmail.com", 
-        to:      login.email,
-        subject: "A Change Has Been Made To Your Reticulum Account"
-      }, function(err, message) { console.log(err || message); });
-    });
 
-    res.redirect('/');
+      console.log(login.UserID);
+      console.log(randPass);
+
+      connection.query("UPDATE login SET password=? WHERE UserID =?", [randPass, login.UserID], function(err, result){
+        if(err){
+          next(err);
+          return;
+        }
+        server.send({
+          text:    "New password for Reticulum Account: " + randPass, 
+          from:    "reticulumcs467@gmail.com", 
+          to:      login.email,
+          subject: "A Change Has Been Made To Your Reticulum Account"
+        }, function(err, message) { console.log(err || message); });
+      });
+
+      var status = "Email Sent With New Password";
+      res.render('resetRedirect', {notify: status});
+    }
+    else {
+      var status = "No User Found";
+      res.render('resetRedirect', {notify: status});
+    }
   });
 });
 
@@ -303,40 +317,47 @@ app.post('/login', passport.authenticate('local-signin', {
 
 //logs user out of site, deleting them from the session, and returns to homepage
 app.get('/logout', function(req, res){
-  var uname = req.user.email;
-  console.log("LOGGIN OUT " + uname);
-  req.logout();
-  res.redirect('/');
-  req.session.notice = "You have successfully been logged out " + uname + "!";
+  if(req.user) {
+    var uname = req.user.email;
+    console.log("LOGGIN OUT " + uname);
+    req.logout();
+    res.redirect('/');
+    req.session.notice = "You have successfully been logged out " + uname + "!";
+  }
+  else
+    {res.render('home');}
 });
 
 
 app.get('/createNewAward', function(req, res) {
-  
+ if(req.user) {
   connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
-  if(err){
-	next(err);
-	return;
-  }
-  loggedin = rows[0];
-  // search for all employees
-  var uQuery = "SELECT * FROM users";
-  connection.query(uQuery, function(err,rows){
     if(err){
       next(err);
       return;
     }
-    users = rows;
-    var typeQuery = "SELECT * FROM certtypes";
-    connection.query(typeQuery, function(err,rows){
+    loggedin = rows[0];
+    // search for all employees
+    var uQuery = "SELECT * FROM users";
+    connection.query(uQuery, function(err,rows){
       if(err){
         next(err);
         return;
       }
-      res.render('createNewAward', {user: req.user, users: users, userinfo: loggedin, type: rows});
+      users = rows;
+      var typeQuery = "SELECT * FROM certtypes";
+      connection.query(typeQuery, function(err,rows){
+        if(err){
+          next(err);
+          return;
+        }
+        res.render('createNewAward', {user: req.user, users: users, userinfo: loggedin, type: rows});
+      });
     });
   });
-});
+ }
+ else
+  {res.render('home');}
 });
 
 app.post('/newAward', function(req, res, next) {
@@ -352,35 +373,44 @@ app.post('/newAward', function(req, res, next) {
 });
 
 app.get('/changeName', function(req, res, next) {
-
-  connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
-  if(err){
-	next(err);
-	return;
+  if(req.user)
+  {
+    connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
+      if(err){
+	       next(err);
+	       return;
+      }
+      loggedin = rows[0];
+      var ID = req.user.UserID;
+      connection.query('SELECT fname, lname, signature FROM users WHERE userID = ?', [ID], function(err, rows){
+        if(err){
+          next(err);
+          return;
+        }
+        var hasSig = 1;
+        var noSig = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
+        name = rows[0];
+        if(name.signature.length == 0) {
+          hasSig = 0;
+        }
+        res.render('changeName', {user: req.user, name: name, userinfo: loggedin, signature: name, hasSig: hasSig, noSig: noSig});
+      });
+    });
   }
-  loggedin = rows[0];
-  var ID = req.user.UserID;
-  connection.query('SELECT fname, lname, signature FROM users WHERE userID = ?', [ID], function(err, rows){
-    if(err){
-      next(err);
-      return;
-    }
-    name = rows[0];
-    res.render('changeName', {user: req.user, name: name, userinfo: loggedin, signature: name});
-  });
-  });
+  else
+    {res.render('home');}
 });
 
 app.get('/deleteAward', function(req, res, next) {
     //var awardQuery = "SELECT * FROM empcerts";
     //connection.query('SELECT users.userID, empCertID, users.fname, users.lname, regions.regionName, dateAwarded, certtypes.name FROM certtypes INNER JOIN empcerts ON empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID GROUP BY empCertID', function(err, rows){
-	
-connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
-  if(err){
-	next(err);
-	return;
-  }
-  loggedin = rows[0];
+ if(req.user) {
+  connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
+    if(err){
+      next(err);
+      return;
+    }
+    loggedin = rows[0];
   
     connection.query('SELECT * FROM certtypes INNER JOIN empcerts on empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID GROUP BY empcerts.empCertID', function(err, rows){
       if(err){
@@ -389,12 +419,15 @@ connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], func
       }
       res.render('deleteAward', {user: req.user, userinfo: loggedin, awards: rows});
     });
-});
+  });
+ }
+ else
+  {res.render('home');}
 });
 
 //send award winner's email
 app.get('/sendAward', function(req, res, next) {
-
+ if(req.user) {
   //connection.query('SELECT * FROM empcerts WHERE empCertID = ?', [req.query.sentid], function(err, rows){
     connection.query('SELECT * FROM certtypes INNER JOIN empcerts on empcerts.certID = certtypes.certID INNER JOIN users on users.userID = empcerts.userID WHERE empCertID = ? GROUP BY empcerts.empCertID', [req.query.sentid], function(err, rows){
     if(err){
@@ -415,22 +448,60 @@ app.get('/sendAward', function(req, res, next) {
           return;
         }
         issuer = rows[0];
+
+        var awardpath = "./awards/award_"+Math.random()+".pdf"
+        var document = {
+            template: '</br></br></br></br></br><h3 align="center">{{msg1}}</h3></br><h1 align="center">{{msg2}}</h1><h3 align="center">{{msg4}}</h3>'+
+            '</br></br></br></br></br></br></br></br></br></br></br></br><img align="right" height="60" width="168" style="margin-right:10em;" src={{sig}} />'+
+            '</br></br></br><h6 align="right" style="margin-right:10em;">{{msg3}}</h6>',
+            context: {
+            msg1: 'Reticulum Awards',
+            msg2: award.name,
+            msg3: award.dateAwarded,
+            msg4: "to " + award.fname + " " + award.lname,
+            sig: issuer.signature
+            },
+            path: awardpath
+        }
+ 
+        pdf.create(document)
+          .then(res => {
+            console.log(res)
+          })
+          .catch(error => {
+            console.error(error)
+          })
+
+        function sendEmail() {
         server.send({
           text:    "Congratulations " + award.fname + " " + award.lname + ", you have won the following award at Reticulum - " + award.name + " - for the following time period: " + award.dateAwarded + ". Award Issued By: " + issuer.fname + " " + issuer.lname, 
           from:    "reticulumcs467@gmail.com", 
           to:      winner.email,
-          subject: "You have been awarded by Reticulum"
+          subject: "You have been awarded by Reticulum",
+          attachment: 
+          [
+            {data:"<html>Your Award</html>", alternative:true},
+            {path:awardpath, type:"application/pdf", name:"award.pdf"}
+          ]
         }, function(err, message) { console.log(err || message); });
 
-        res.redirect('/deleteAward');
+        }
+
+        setTimeout(sendEmail, 5000);
+
+        var status = "Award Email Sent";
+        res.render('awardRedirect', {notify: status});
       });
     });
   });
+ }
+ else
+  {res.render('home');}
 });
 
 //remove an award that was selected for deletion
 app.get('/removeAward', function(req, res, next) {
-
+ if(req.user) {
   connection.query('DELETE FROM empcerts WHERE empCertID = ?', [req.query.sentid], function(err, rows){
     if(err){
       next(err);
@@ -438,10 +509,13 @@ app.get('/removeAward', function(req, res, next) {
     }
     res.redirect('/deleteAward');
   });
+ }
+ else
+  {res.render('home');}
 });
 
 app.get('/manageUsers', function(req, res) {
-	
+ if(req.user) {
   connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
   if(err){
 	next(err);
@@ -458,10 +532,13 @@ app.get('/manageUsers', function(req, res) {
       res.render('manageUsers', {user: req.user, admininfo: loggedin, regions: rows});
     });
   });
+ }
+ else
+  {res.render('home');}
 });
 
 app.get('/manageAdmins', function(req, res) {
-
+ if(req.user) {
   connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
   if(err){
 	next(err);
@@ -471,9 +548,13 @@ app.get('/manageAdmins', function(req, res) {
   
   res.render('manageAdmins', {user: req.user, admininfo: loggedin});
   });
+ }
+ else
+  {res.render('home');}
 });
 
 app.get('/BIoperations', function(req, res) {
+<<<<<<< HEAD
 
   connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
   if(err){
@@ -486,6 +567,14 @@ app.get('/BIoperations', function(req, res) {
   res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
   });
 
+=======
+ if(req.user) {
+  queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
+  res.render('BIoperations', {user: req.user, sampleQ: queries});
+ }
+ else
+  {res.render('home');}
+>>>>>>> origin/master
 });
 
 app.post('/BIquery', function(req, res) {	
@@ -508,18 +597,12 @@ app.post('/BIquery', function(req, res) {
 });
 
 app.post('/editProfile', function(req, res, next) {
-  connection.query("UPDATE users SET fname=?, lname=? WHERE userID =?", [req.body.newFName, req.body.newLName, req.user.UserID], function(err, result){
+  connection.query("UPDATE users SET fname=?, lname=?, signature=? WHERE userID =?", [req.body.newFName, req.body.newLName, req.body.newSig, req.user.UserID], function(err, result){
 
     if(err){
       next(err);
       return;
     }
-    connection.query("UPDATE login SET isAdmin=? WHERE UserID =?", [req.user.isAdmin, req.user.UserID], function(err, result){
-      if(err){
-        next(err);
-        return;
-      }
-    });
   });
 
   res.redirect('/');

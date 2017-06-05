@@ -10,22 +10,29 @@
         <br>
         <p>Last Name: {{name.lname}}</p>
         <p>First Name: {{name.fname}}</p>
-        <div> <img alt="Signature" src="{{name.signature}}" img-responsive" height="80" width="168"> </div>
+        {{#if hasSig}}
+        <div> <img src="{{name.signature}}" height="60" width="168" class="img-fluid" alt="Responsive image"> </div>
+        {{else}}
+        <div> <img src="{{noSig}}" height="60" width="168" class="img-fluid" alt="Responsive image"> </div>
+        {{/if}}
       </div>
       <div class="panel-body">
         <form action="/editProfile" method="post">
            <fieldset>
              <label for="newLName">New Last Name</label>
-             <input type="text" name="newLName" id="newLName">
+             <input type="text" name="newLName" id="newLName" value={{name.lname}}>
 
              </br>
              </br>
 
-             <label for="newFName">Edit First Name?</label>
-             <select id="newFName" name="newFName" onchange="changeToInput(this);">
-                <option value={{name.fname}}>No</option>
-                <option value="Yes">Yes</option>
-              </select>
+             <label for="newFName">New First Name</label>
+             <input type="text" name="newFName" id="newFName" value={{name.fname}}>
+
+             </br>
+             </br>
+
+             <label for="newSig">Signature Image URL</label>
+             <input type="text" name="newSig" id="newSig" value={{name.signature}}>
 
            </br>
            </br>
@@ -34,35 +41,6 @@
          </form>
       </div>
     </div>
-    <script>
-      var Objs;
-
-      function changeToInput(obj){
-          var sel = document.getElementById('newFName');
-          var newProf = sel.options[sel.selectedIndex].text;
-          if(newProf == 'Yes') {
-          tb=document.createElement('INPUT');
-          tb.type='text';
-          tb.name='newFName';
-          tb.id='newFName';
-          tb.value=obj.options[obj.selectedIndex].text;
-          tbb=document.createElement('INPUT');
-          tbb.type='button';
-          tbb.value='Back';
-          tbb.objs=[obj,tb,tbb];
-          tbb.onclick=function(){ Replace(this.objs); }
-          obj.parentNode.insertBefore(tb,obj);
-          obj.parentNode.insertBefore(tbb,obj);
-          obj.parentNode.removeChild(obj);
-       }
-      }
-
-      function Replace(obj){
-        obj[2].parentNode.insertBefore(obj[0],obj[2]);
-        obj[0].parentNode.removeChild(obj[1]);
-        obj[0].parentNode.removeChild(obj[2]);
-      }
-    </script>
 
 {{else}}
   <div class="jumbotron text-center">
