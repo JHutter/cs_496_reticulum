@@ -204,33 +204,35 @@ app.set('port', 50000);
 
 app.get('/', function(req, res) {
   if(req.user)
-	{		
-    var context = {};
-    connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
-      if(err){
-        next(err);
-        return;
-      }
-      console.log(rows);
-      loggedin = rows[0];
-      if(loggedin.signature.length == 0) {
-        loggedin.signature = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
-      }
+	{
+    if(!req.user.isAdmin) {
+      connection.query('SELECT * FROM users where userID = ?', [req.user.UserID], function(err, rows){
+        if(err){
+          next(err);
+          return;
+        }
+        console.log(rows);
+        loggedin = rows[0];
+        if(loggedin.signature.length == 0) {
+          loggedin.signature = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
+        }
+        res.render('home', {user: req.user, userinfo: loggedin});
+      });
+    }
+    else {
       connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
         if(err){
           next(err);
           return;
         }
+        console.log(rows);
         adminloggedin = rows[0];
-        res.render('home', {user: req.user, admininfo: adminloggedin, userinfo: loggedin});
+        res.render('home', {user: req.user, admininfo: adminloggedin});
       });
-    });
-	}
-	
-	else
+    }
+  }
+  else
     {res.render('home');}
-
-  
 });
 
 //displays our signup page
