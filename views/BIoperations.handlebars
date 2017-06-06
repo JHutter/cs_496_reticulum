@@ -20,7 +20,7 @@
 							{{/each}}
 						</select>
 						</br>
-				<input type="submit" id="submit" value="Submit">
+				<input type="submit" id="submit" value="Show Chart">
 			</fieldset>
 		</form>
 		
@@ -68,7 +68,7 @@
 					// feed it to arrayToDataTable
 					var chartData = google.visualization.arrayToDataTable(newArr);
 					var options = {
-						title: response.title,
+						title: response.chartTitle,
 						chartArea: {width: '50%'},
 						colors: ['#b0120a'],
 						hAxis: {
@@ -80,9 +80,60 @@
 						}
 					};
 					var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+					
+					/*google.visualization.events.addListener(chart, 'ready', function () {
+						  chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+						});*/
 					chart.draw(chartData, options);
 					
+				} 
+				else {
+					console.log("Error: " + request.statusText);
+				}
+			});
+			var sentObject = {"query": queryType};
+			req.send(JSON.stringify(sentObject));
+		})
+	}
+	
+	function bindExportButton(){
+		document.getElementById('export').addEventListener('click', function(event){
+			event.preventDefault();	
+			console.log("export");
+			var req = new XMLHttpRequest();
+			var queryType = document.getElementById("query").value;
+			//var baseURL = 'http://sample-env-1.ika8zhqiie.us-west-2.elasticbeanstalk.com/BIquery?';
+			var baseURL = 'http://localhost:50000/BIquery';
+			var signature = baseURL + '?query=' + queryType;
+			
+			req.open("POST", baseURL, true);
+			req.setRequestHeader('Content-Type', 'application/json');			
+			req.addEventListener('load',function(){
+				if(req.status >= 200 && req.status < 400){
+					console.log("got some data");
+					var response = JSON.parse(req.responseText);
+					console.log(response);
 					
+					var data = JSON.parse(response.data);
+					var newArr = [];
+					var first = [response.yAxis, response.xAxis];
+					newArr.push(first);
+					
+					for (var i = 0; i < data.length; i++){
+						newArr.push([data[i].name, data[i].awardNum]);
+					}
+					
+					// source: https://stackoverflow.com/questions/18848860/javascript-array-to-csv/
+					// source: https://stackoverflow.com/questions/12365534/launch-download-in-the-same-tab-without-opening-new-tab-or-window-in-javascript
+					var csvContent = "data:text/csv;charset=utf-8,";
+					for (i = 0; i < newArr.length; i++){
+						dataString = newArr[i].join(", ");
+						csvContent += dataString + "\n";
+					}
+					
+					var encodedUri = encodeURI(csvContent);
+					window.location.href = encodedUri;
+					console.log(encodedUri);
 					
 				} 
 				else {
@@ -103,6 +154,7 @@
 	
 	
 	document.addEventListener('DOMContentLoaded', bindSubmitButton);
+	document.addEventListener('DOMContentLoaded', bindExportButton);
 	
 	
 	
