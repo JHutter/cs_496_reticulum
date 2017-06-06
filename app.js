@@ -132,9 +132,13 @@ passport.use('local-signup', new LocalStrategy({
           connection.query(insertUsersQuery, [newUserMysql.id, req.body.rid, req.body.fname, req.body.lname], function(err,rows){
             if (err)
               return done(err);
-          });
+            connection.query("select * from login where UserID = ?", [newUserMysql.id],function(err,rows){
+              if (err)
+                return done(err);
 
-          return done(null, newUserMysql);
+              return done(null, rows[0]);
+            });
+          });
         });
       }
     });
@@ -209,9 +213,9 @@ app.get('/', function(req, res) {
       }
       console.log(rows);
       loggedin = rows[0];
-      //if(loggedin.signature.length == 0) {
-        //loggedin.signature = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
-      //}
+      if(loggedin.signature.length == 0) {
+        loggedin.signature = "https://drive.google.com/uc?id=0B_4RP0qw1BEIa3dCT0tVa3c3WHM";
+      }
       connection.query('SELECT * FROM admins where adminID = ?', [req.user.UserID], function(err, rows){
         if(err){
           next(err);
