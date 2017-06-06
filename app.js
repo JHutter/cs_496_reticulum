@@ -473,36 +473,33 @@ app.get('/sendAward', function(req, res, next) {
         pdf.create(document)
           .then(res => {
             console.log(res)
+            server.send({
+              text:    "Congratulations " + award.fname + " " + award.lname + ", you have won the following award at Reticulum - " + award.name + " - for the following time period: " + award.dateAwarded + ". Award Issued By: " + issuer.fname + " " + issuer.lname, 
+              from:    "reticulumcs467@gmail.com", 
+              to:      winner.email,
+              subject: "You have been awarded by Reticulum",
+              attachment: 
+              [
+                {data:"<html>Your Award</html>", alternative:true},
+                {path:awardpath, type:"application/pdf", name:"award.pdf"}
+              ]
+            }, function(err, message) { console.log(err || message); });
+
           })
           .catch(error => {
             console.error(error)
           })
-
-        function sendEmail() {
-        server.send({
-          text:    "Congratulations " + award.fname + " " + award.lname + ", you have won the following award at Reticulum - " + award.name + " - for the following time period: " + award.dateAwarded + ". Award Issued By: " + issuer.fname + " " + issuer.lname, 
-          from:    "reticulumcs467@gmail.com", 
-          to:      winner.email,
-          subject: "You have been awarded by Reticulum",
-          attachment: 
-          [
-            {data:"<html>Your Award</html>", alternative:true},
-            {path:awardpath, type:"application/pdf", name:"award.pdf"}
-          ]
-        }, function(err, message) { console.log(err || message); });
-
-        }
-
-        setTimeout(sendEmail, 5000);
-
-        var status = "Award Email Sent";
-        res.render('awardRedirect', {notify: status});
+          res.redirect('/awardRedirect');
       });
     });
   });
  }
  else
   {res.render('home');}
+});
+
+app.get('/awardRedirect', function(req, res){
+  res.render('awardRedirect', {user: req.user});
 });
 
 //remove an award that was selected for deletion
