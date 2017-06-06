@@ -457,12 +457,14 @@ app.get('/sendAward', function(req, res, next) {
         var document = {
             template: '</br></br></br></br></br><h3 align="center">{{msg1}}</h3></br><h1 align="center">{{msg2}}</h1><h3 align="center">{{msg4}}</h3>'+
             '</br></br></br></br></br></br></br></br></br></br></br></br><img align="right" height="60" width="168" style="margin-right:10em;" src={{sig}} />'+
-            '</br></br></br><h6 align="right" style="margin-right:10em;">{{msg3}}</h6>',
+            '</br></br></br><h6 align="right" style="margin-right:10em;">{{msg5}}</h6>'+
+            '<h6 align="right" style="margin-right:10em;">{{msg3}}</h6>',
             context: {
             msg1: 'Reticulum Awards',
             msg2: award.name,
             msg3: award.dateAwarded,
             msg4: "to " + award.fname + " " + award.lname,
+            msg5: issuer.fname + " " + issuer.lname,
             sig: issuer.signature
             },
             path: awardpath
