@@ -716,7 +716,7 @@ app.get("/regUsers", function(req, res, next){
 app.get("/delete-row", function(req, res, next){
 	
 	
-	connection.query("DELETE FROM users, empcerts WHERE userID=?", [req.query.UserID], function(err, rows, fields){
+	connection.query("DELETE FROM users WHERE userID=?", [req.query.UserID], function(err, rows, fields){
 		if(err){
 			next(err);
 			return;
