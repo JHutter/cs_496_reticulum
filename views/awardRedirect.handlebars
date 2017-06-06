@@ -1,8 +1,26 @@
+ {{#if user}}
+ 	<div class="jumbotron text-center">
+    	<h2>Award Email Sent</h2>
+    	<p>
+      		<a href="/" class="btn btn-primary btn-lg" role="button">
+        	Return To Home Page
+      	</a>
+    	</p>
+  	</div>
+
+  {{else}}
   <div class="jumbotron text-center">
-    <h2>{{notify}}</h2>
+    <h1>Reticulum</h1>
+    <p>Sign in</p><br>
+    <p> Or </p><br>
+    <p>Sign up and get started!</p>
     <p>
-      <a href="/" class="btn btn-primary btn-lg" role="button">
-        Return To Home Page
+      <a href="/signin" class="btn btn-primary btn-lg" role="button">
+        <span class="glyphicon glyphicon-user"></span>
+       Sign in / Sign up
       </a>
     </p>
   </div>
+
+{{/if}}
+
