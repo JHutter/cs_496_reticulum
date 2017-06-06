@@ -31,6 +31,7 @@
 		<br>
 		<br>
 		<input type="submit" id="export" value="Export to CSV">
+		<input type="submit" id="getimage" value="Export Chart Image">
 		
 	</div>
 </div>
@@ -145,6 +146,67 @@
 		})
 	}
 	
+	function bindImageButton(){
+		document.getElementById('getimage').addEventListener('click', function(event){
+			event.preventDefault();	
+			console.log("click");
+			var req = new XMLHttpRequest();
+			var queryType = document.getElementById("query").value;
+			//var baseURL = 'http://sample-env-1.ika8zhqiie.us-west-2.elasticbeanstalk.com/BIquery?';
+			var baseURL = 'http://localhost:50000/BIquery';
+			var signature = baseURL + '?query=' + queryType;
+			
+			req.open("POST", baseURL, true);
+			req.setRequestHeader('Content-Type', 'application/json');			
+			req.addEventListener('load',function(){
+				if(req.status >= 200 && req.status < 400){
+					console.log("got some data");
+					var response = JSON.parse(req.responseText);
+					console.log(response);
+					
+					var data = JSON.parse(response.data);
+					var newArr = [];
+					var first = [response.yAxis, response.xAxis];
+					newArr.push(first);
+					
+					for (var i = 0; i < data.length; i++){
+						newArr.push([data[i].name, data[i].awardNum]);
+					}
+					
+					// feed it to arrayToDataTable
+					var chartData = google.visualization.arrayToDataTable(newArr);
+					var options = {
+						title: response.chartTitle,
+						chartArea: {width: '50%'},
+						colors: ['#b0120a'],
+						hAxis: {
+						  title: response.xAxis,
+						  minValue: 0
+						},
+						vAxis: {
+						  title: response.yAxis
+						}
+					};
+					var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+					
+					// source: https://developers.google.com/chart/interactive/docs/printing
+					// source: https://stackoverflow.com/questions/10473932/browser-html-force-download-of-image-from-src-dataimage-jpegbase64
+					chart.draw(chartData, options);
+					var url = chart.getImageURI().replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+					window.open(url);
+					//window.location.href = chart.getImageURI();
+					//window.open(chart.getImageURI());
+					
+				} 
+				else {
+					console.log("Error: " + request.statusText);
+				}
+			});
+			var sentObject = {"query": queryType};
+			req.send(JSON.stringify(sentObject));
+		})
+	}
+	
 	google.charts.setOnLoadCallback(drawBarColors);
 	
 	function drawBarColors() {
@@ -155,6 +217,7 @@
 	
 	document.addEventListener('DOMContentLoaded', bindSubmitButton);
 	document.addEventListener('DOMContentLoaded', bindExportButton);
+	document.addEventListener('DOMContentLoaded', bindImageButton);
 	
 	
 	
