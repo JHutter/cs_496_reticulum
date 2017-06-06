@@ -564,9 +564,9 @@ if(req.user){
 	next(err);
 	return;
   }
-  loggedin = rows[0];
+  //loggedin = rows[0];
   
-  queries = [{textQ: "Which users have created awards?", query: "user_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
+  queries = [{textQ: "Which users have created awards?", query: "issuer_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
   res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
   });
 }
@@ -582,15 +582,29 @@ app.post('/BIquery', function(req, res) {
   res.type('application/json');
 
   var queryCode = req.body.query;
-  var BIQuery = "SELECT concat(fname, ' ', lname) as name, 10 as awardCount FROM users";
+  if (queryCode === "issuer_awards"){
+	var BIQuery = "select concat(fname, ' ', lname) as name, count(*) as awardNum from empcerts left join users on users.userID = empcerts.issuerID group by issuerID";
     connection.query(BIQuery, function(err,rows){
       if(err){
         next(err);
         return;
       }
-	  //console.log(rows);
+	  var results = {charTitle: req.body.textQ, xAxis: "Number of Awards", };
+	  console.log(rows);
 	  res.send(rows);
     });  
+  }
+  else if (queryCode === "region_awards"){
+	  var BIQuery = "select concat(fname, ' ', lname), count(*) from empcerts left join users on users.userID = empcerts.issuerID group by issuerID";
+    connection.query(BIQuery, function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+	  console.log(rows);
+	  res.send(rows);
+    });  
+  }
 });
 
 app.post('/editProfile', function(req, res, next) {
