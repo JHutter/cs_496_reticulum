@@ -566,7 +566,7 @@ if(req.user){
 	next(err);
 	return;
   }
-  //loggedin = rows[0];
+  loggedin = rows[0];
   
   queries = [{textQ: "Which users have created awards?", query: "issuer_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
   res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
@@ -585,26 +585,32 @@ app.post('/BIquery', function(req, res) {
 
   var queryCode = req.body.query;
   if (queryCode === "issuer_awards"){
-	var BIQuery = "select concat(fname, ' ', lname) as name, count(*) as awardNum from empcerts left join users on users.userID = empcerts.issuerID group by issuerID";
+	var queryTitle = "Which users have created awards?";
+	var BIQuery = "select concat(fname, ' ', lname) as name, count(*) as awardNum from empcerts" 
+		+ " left join users on users.userID = empcerts.issuerID group by issuerID order by awardNum desc";
     connection.query(BIQuery, function(err,rows){
       if(err){
         next(err);
         return;
       }
-	  var results = {charTitle: req.body.textQ, xAxis: "Number of Awards", };
-	  console.log(rows);
-	  res.send(rows);
+	  
+	  var results = {chartTitle: queryTitle, xAxis: "Number of Awards", yAxis: "Issuer Name", data: JSON.stringify(rows)};
+	  res.send(results);
     });  
   }
   else if (queryCode === "region_awards"){
-	  var BIQuery = "select concat(fname, ' ', lname), count(*) from empcerts left join users on users.userID = empcerts.issuerID group by issuerID";
+	var queryTitle = "Which region had the most awards?";
+	var BIQuery = "select regionName as name, count(*) as awardNum from regions"
+			+ " left join users on users.regionID = regions.regionID left join empcerts on empcerts.userID = users.userID"
+			+ " group by regionName order by awardNum desc";
     connection.query(BIQuery, function(err,rows){
       if(err){
         next(err);
         return;
       }
-	  console.log(rows);
-	  res.send(rows);
+	  
+	  var results = {chartTitle: queryTitle, xAxis: "Number of Awards", yAxis: "Region Name", data: JSON.stringify(rows)};
+	  res.send(results);
     });  
   }
 });

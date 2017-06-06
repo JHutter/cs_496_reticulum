@@ -37,37 +37,11 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
 	google.charts.load('current', {packages: ['corechart', 'bar']});
-	google.charts.setOnLoadCallback(drawBarColors);
-	function drawBarColors() {
-	  var data = google.visualization.arrayToDataTable([
-		['City', '2010 Population'],
-		['New York City, NY', 8175000],
-		['Los Angeles, CA', 3792000],
-		['Chicago, IL', 2695000],
-		['Houston, TX', 2099000],
-		['Philadelphia, PA', 1526000]
-	  ]);
-	  //var data = google.visualization.arrayToDataTable(newData);
-
-	  var options = {
-		title: 'Employees Who Have Created Awards',
-		chartArea: {width: '50%'},
-		colors: ['#b0120a', '#ffab91'],
-		hAxis: {
-		  title: 'Number of Awards',
-		  minValue: 0
-		},
-		vAxis: {
-		  title: 'Name'
-		}
-	  };
-	  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
-	  chart.draw(data, options);
-	}
-
+	
 	function bindSubmitButton(){
 		document.getElementById('submit').addEventListener('click', function(event){
 			event.preventDefault();	
+			console.log("click");
 			var req = new XMLHttpRequest();
 			var queryType = document.getElementById("query").value;
 			//var baseURL = 'http://sample-env-1.ika8zhqiie.us-west-2.elasticbeanstalk.com/BIquery?';
@@ -78,37 +52,36 @@
 			req.setRequestHeader('Content-Type', 'application/json');			
 			req.addEventListener('load',function(){
 				if(req.status >= 200 && req.status < 400){
+					console.log("got some data");
 					var response = JSON.parse(req.responseText);
 					console.log(response);
-					// display the chart
-					/*var data = google.visualization.arrayToDataTable([
-						['City', '2010 Population'],
-						['New York City, NY', 8175000],
-						['Los Angeles, CA', 3792000],
-						['Chicago, IL', 2695000],
-						['Houston, TX', 2099000],
-						['Philadelphia, PA', 1526000]
-					  ]);*/
-					  var newData = [];
-					  for (var i in response){
-							newData.push([response[i].name, response[i].awardCount]);
-					  }
-					  var data = google.visualization.arrayToDataTable(newData);
-
-					  var options = {
-						title: 'Employees Who Have Created Awards',
+					
+					var data = JSON.parse(response.data);
+					var newArr = [];
+					var first = [response.yAxis, response.xAxis];
+					newArr.push(first);
+					
+					for (var i = 0; i < data.length; i++){
+						newArr.push([data[i].name, data[i].awardNum]);
+					}
+					
+					// feed it to arrayToDataTable
+					var chartData = google.visualization.arrayToDataTable(newArr);
+					var options = {
+						title: response.title,
 						chartArea: {width: '50%'},
-						colors: ['#b0120a', '#ffab91'],
+						colors: ['#b0120a'],
 						hAxis: {
-						  title: 'Number of Awards',
+						  title: response.xAxis,
 						  minValue: 0
 						},
 						vAxis: {
-						  title: 'Name'
+						  title: response.yAxis
 						}
-					  };
-					  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
-					  chart.draw(data, options);
+					};
+					var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+					chart.draw(chartData, options);
+					
 					
 					
 				} 
@@ -120,7 +93,18 @@
 			req.send(JSON.stringify(sentObject));
 		})
 	}
+	
+	google.charts.setOnLoadCallback(drawBarColors);
+	
+	function drawBarColors() {
+		console.log("google visualization loaded");
+		
+	}
+	
+	
 	document.addEventListener('DOMContentLoaded', bindSubmitButton);
+	
+	
 	
 </script>
 
