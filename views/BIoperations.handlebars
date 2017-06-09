@@ -46,9 +46,11 @@
 			console.log("click");
 			var req = new XMLHttpRequest();
 			var queryType = document.getElementById("query").value;
-			//var baseURL = 'http://sample-env-1.ika8zhqiie.us-west-2.elasticbeanstalk.com/BIquery?';
+			var baseURL = 'http://' + window.location.hostname + '/BIquery?';
+			//'http://sample-env-1.ika8zhqiie.us-west-2.elasticbeanstalk.com/BIquery?';
+			//console.log(window.location.hostname);
 
-			var baseURL = 'http://localhost:50000/BIquery';
+			//var baseURL = 'http://localhost:50000/BIquery';
 			var signature = baseURL + '?query=' + queryType;
 			
 			req.open("POST", baseURL, true);

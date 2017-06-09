@@ -195,9 +195,9 @@ app.use(function(req, res, next){
 
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
-app.set('port', 50000);
+//app.set('port', 50000);
 // aws needs port set up this way. comment/uncomment as needed
-//app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3000);
 
 
 //===============ROUTES===============
