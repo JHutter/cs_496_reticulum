@@ -30,8 +30,8 @@
 		
 		<br>
 		<br>
-		<input type="submit" id="export" value="Export to CSV">
-		<input type="submit" id="getimage" value="Export Chart Image">
+		<a download href='blank' id="getcsv" style="visibility:hidden;"><button type="button" id="csvButton">Export to CSV</button></a>
+		<a download href='blank' id="getimage" style="visibility:hidden;"><button type="button" id="imgButton">Export Chart Image</button></a>
 		
 	</div>
 </div>
@@ -87,6 +87,9 @@
 						});*/
 					chart.draw(chartData, options);
 					
+					// bind both download buttons here
+					bindImageDownload(chart.getImageURI().replace(/^data:image\/[^;]/, 'data:application/octet-stream'), queryType, ".png");
+					bindCsvDownload(newArr, queryType, ".csv");
 				} 
 				else {
 					console.log("Error: " + request.statusText);
@@ -124,8 +127,7 @@
 						newArr.push([data[i].name, data[i].awardNum]);
 					}
 					
-					// source: https://stackoverflow.com/questions/18848860/javascript-array-to-csv/
-					// source: https://stackoverflow.com/questions/12365534/launch-download-in-the-same-tab-without-opening-new-tab-or-window-in-javascript
+					
 					var csvContent = "data:text/csv;charset=utf-8,";
 					for (i = 0; i < newArr.length; i++){
 						dataString = newArr[i].join(", ");
@@ -146,65 +148,42 @@
 		})
 	}
 	
-	function bindImageButton(){
-		document.getElementById('getimage').addEventListener('click', function(event){
-			event.preventDefault();	
-			console.log("click");
-			var req = new XMLHttpRequest();
-			var queryType = document.getElementById("query").value;
-			//var baseURL = 'http://sample-env-1.ika8zhqiie.us-west-2.elasticbeanstalk.com/BIquery?';
-			var baseURL = 'http://localhost:50000/BIquery';
-			var signature = baseURL + '?query=' + queryType;
-			
-			req.open("POST", baseURL, true);
-			req.setRequestHeader('Content-Type', 'application/json');			
-			req.addEventListener('load',function(){
-				if(req.status >= 200 && req.status < 400){
-					console.log("got some data");
-					var response = JSON.parse(req.responseText);
-					console.log(response);
-					
-					var data = JSON.parse(response.data);
-					var newArr = [];
-					var first = [response.yAxis, response.xAxis];
-					newArr.push(first);
-					
-					for (var i = 0; i < data.length; i++){
-						newArr.push([data[i].name, data[i].awardNum]);
-					}
-					
-					// feed it to arrayToDataTable
-					var chartData = google.visualization.arrayToDataTable(newArr);
-					var options = {
-						title: response.chartTitle,
-						chartArea: {width: '50%'},
-						colors: ['#b0120a'],
-						hAxis: {
-						  title: response.xAxis,
-						  minValue: 0
-						},
-						vAxis: {
-						  title: response.yAxis
-						}
-					};
-					var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
-					
-					// source: https://developers.google.com/chart/interactive/docs/printing
-					// source: https://stackoverflow.com/questions/10473932/browser-html-force-download-of-image-from-src-dataimage-jpegbase64
-					chart.draw(chartData, options);
-					var url = chart.getImageURI().replace(/^data:image\/[^;]/, 'data:application/octet-stream');
-					window.open(url);
-					//window.location.href = chart.getImageURI();
-					//window.open(chart.getImageURI());
-					
-				} 
-				else {
-					console.log("Error: " + request.statusText);
-				}
-			});
-			var sentObject = {"query": queryType};
-			req.send(JSON.stringify(sentObject));
-		})
+	// source: https://developers.google.com/chart/interactive/docs/printing
+	// source: https://stackoverflow.com/questions/10473932/browser-html-force-download-of-image-from-src-dataimage-jpegbase64
+	// source: https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
+	function bindImageDownload(imageSrc, title, extension){
+		var buttonVar = document.getElementById("imgButton");
+		buttonVar.click(function(event){
+			event.preventDefault();
+		});
+		var imgbuttondownload = document.getElementById("getimage");
+		imgbuttondownload.setAttribute("href", imageSrc);
+		imgbuttondownload.setAttribute("download", title+extension);
+		imgbuttondownload.style.visibility = "visible";
+		return;
+	}
+	
+	// source: https://stackoverflow.com/questions/18848860/javascript-array-to-csv/
+	// source: https://stackoverflow.com/questions/12365534/launch-download-in-the-same-tab-without-opening-new-tab-or-window-in-javascript
+	function bindCsvDownload(dataArr, title, extension){
+		var buttonVar = document.getElementById("csvButton");
+		buttonVar.click(function(event){
+			event.preventDefault();
+		});
+		
+		
+		
+		var csvContent = "data:text/csv;charset=utf-8,";
+		for (i = 0; i < dataArr.length; i++){
+			dataString = dataArr[i].join(", ");
+			csvContent += dataString + "\n";
+		}			
+		var encodedUri = encodeURI(csvContent);
+		var csvbuttondownload = document.getElementById("getcsv");
+		csvbuttondownload.setAttribute("href", encodedUri);
+		csvbuttondownload.setAttribute("download", title+extension);
+		csvbuttondownload.style.visibility = "visible";
+		return;
 	}
 	
 	google.charts.setOnLoadCallback(drawBarColors);
@@ -216,8 +195,7 @@
 	
 	
 	document.addEventListener('DOMContentLoaded', bindSubmitButton);
-	document.addEventListener('DOMContentLoaded', bindExportButton);
-	document.addEventListener('DOMContentLoaded', bindImageButton);
+	
 	
 	
 	
