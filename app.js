@@ -568,7 +568,10 @@ if(req.user){
   }
   loggedin = rows[0];
   
-  queries = [{textQ: "Which users have created awards?", query: "issuer_awards"}, {textQ: "Which region had the most awards?", query: "region_awards"}];	
+  queries = [{textQ: "Which users have created awards?", query: "issuer_awards"}, 
+			{textQ: "Which region had the most awards by issuer?", query: "region_awards_issuer"},
+			{textQ: "Which region had the most awards by recipient?", query: "region_awards_receiver"},
+			{textQ: "Which user has received the most awards?", query: "recv_awards"}];	
   res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
   });
 }
@@ -598,8 +601,23 @@ app.post('/BIquery', function(req, res) {
 	  res.send(results);
     });  
   }
-  else if (queryCode === "region_awards"){
-	var queryTitle = "Which region had the most awards?";
+  else if (queryCode === "region_awards_issuer"){
+	var queryTitle = "Which region had the most awards by issuer?";
+	var BIQuery = "select regionName as name, count(*) as awardNum from regions"
+			+ " left join users on users.regionID = regions.regionID left join empcerts on empcerts.issuerID = users.userID"
+			+ " group by regionName order by awardNum desc";
+    connection.query(BIQuery, function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+	  
+	  var results = {chartTitle: queryTitle, xAxis: "Number of Awards", yAxis: "Region Name", data: JSON.stringify(rows)};
+	  res.send(results);
+    });  
+  }
+  else if (queryCode === "region_awards_receiver"){
+	var queryTitle = "Which region had the most awards by recipient?";
 	var BIQuery = "select regionName as name, count(*) as awardNum from regions"
 			+ " left join users on users.regionID = regions.regionID left join empcerts on empcerts.userID = users.userID"
 			+ " group by regionName order by awardNum desc";
@@ -612,6 +630,23 @@ app.post('/BIquery', function(req, res) {
 	  var results = {chartTitle: queryTitle, xAxis: "Number of Awards", yAxis: "Region Name", data: JSON.stringify(rows)};
 	  res.send(results);
     });  
+  }
+  else if (queryCode === "recv_awards"){
+	var queryTitle = "Which user has received the most awards?";
+	var BIQuery = "select concat(fname, ' ', lname) as name, count(*) as awardNum from empcerts" 
+		+ " left join users on users.userID = empcerts.userID group by users.userID order by awardNum desc";
+    connection.query(BIQuery, function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+	  
+	  var results = {chartTitle: queryTitle, xAxis: "Number of Awards", yAxis: "User Name", data: JSON.stringify(rows)};
+	  res.send(results);
+    });  
+  }
+  else {
+	  //
   }
 });
 
