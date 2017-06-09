@@ -6,7 +6,7 @@ function loadTable(){
 
 var req = new XMLHttpRequest();
 
-req.open("get", "http://localhost:50000/adminUsers", true);
+req.open("get", "http://" + window.location.hostname+ "/adminUsers", true);
 
 req.addEventListener('load', function(){
 		if(req.status >= 200 && req.status < 400){
@@ -41,7 +41,7 @@ function bindDelete(theButtons){
 function deleteRow(theRow){
 	
 	var req = new XMLHttpRequest();
-	req.open("GET", "http://localhost:50000/delete-admin-row?UserID=" + theRow, true);
+	req.open("GET", "http://" + window.location.hostname+ "/delete-admin-row?UserID=" + theRow, true);
 	
 	req.addEventListener('load', function(){
 	if(req.status >= 200 && req.status < 400)
@@ -79,7 +79,7 @@ function editRow(theID){
 	
 	var req = new XMLHttpRequest();
 	var data = "UserID=" + theID + "&email=" + email + "&fName=" + fname + "&lName=" + lname;
-	req.open("POST", "http://localhost:50000/edit-admin-row", true);
+	req.open("POST", "http://" + window.location.hostname+ "/edit-admin-row", true);
 
 	
 	req.addEventListener('load', function(){
