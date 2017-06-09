@@ -571,6 +571,7 @@ if(req.user){
   queries = [{textQ: "Which users have created awards?", query: "issuer_awards"}, 
 			{textQ: "Which region had the most awards by issuer?", query: "region_awards_issuer"},
 			{textQ: "Which region had the most awards by recipient?", query: "region_awards_receiver"},
+			{textQ: "Which award type has been awarded the most times?", query: "award_instances"},
 			{textQ: "Which user has received the most awards?", query: "recv_awards"}];	
   res.render('BIoperations', {user: req.user, admininfo: loggedin, sampleQ: queries});
   });
@@ -642,6 +643,20 @@ app.post('/BIquery', function(req, res) {
       }
 	  
 	  var results = {chartTitle: queryTitle, xAxis: "Number of Awards", yAxis: "User Name", data: JSON.stringify(rows)};
+	  res.send(results);
+    });  
+  }
+  else if (queryCode === "award_instances"){
+	var queryTitle = "Which award type has been awarded the most times?";
+	var BIQuery = "select `name`, count(*) as awardNum from certtypes left join empcerts on certtypes.certID = empcerts.certID"
+				+ " group by `name` order by awardNum desc"; 
+    connection.query(BIQuery, function(err,rows){
+      if(err){
+        next(err);
+        return;
+      }
+	  
+	  var results = {chartTitle: queryTitle, xAxis: "Award Count", yAxis: "Award Name", data: JSON.stringify(rows)};
 	  res.send(results);
     });  
   }
